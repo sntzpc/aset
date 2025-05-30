@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aset Seriang Training Center</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- SheetJS (Excel Export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF (PDF Export) + autotable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.1/dist/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+
+<body>
+    <!-- Navbar Brand -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Inventaris Aset SNTZ</a>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div id="userInfo" class="mb-3"></div>
+        <!-- Bootstrap Nav Tabs -->
+        <ul class="nav nav-tabs mb-3" id="mainTab" role="tablist">
+            <li class="nav-item" role="presentation" id="nav-dashboard">
+                <a class="nav-link active" data-bs-toggle="tab" href="#dashboard" role="tab">Dashboard</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-masterdata">
+                <a class="nav-link" data-bs-toggle="tab" href="#masterdata" role="tab">Master Data</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-aset">
+                <a class="nav-link" data-bs-toggle="tab" href="#aset" role="tab">Pencatatan Aset</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-laporan">
+                <a class="nav-link" data-bs-toggle="tab" href="#laporan" role="tab">Pelaporan</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-sync">
+                <a class="nav-link" data-bs-toggle="tab" href="#sync" role="tab">Sinkronisasi</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-peminjaman">
+                <a class="nav-link" data-bs-toggle="tab" href="#peminjaman" role="tab">Peminjaman</a>
+            </li>
+            <li class="nav-item" role="presentation" id="nav-auditlog">
+                <a class="nav-link" data-bs-toggle="tab" href="#auditlog" role="tab">Audit Log</a>
+            </li>
+        </ul>
+
+        <!-- Tab Login -->
+        <div class="modal fade" tabindex="-1" id="loginModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form id="formLogin">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Login Pengguna</h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-2">
+                                <label>Username</label>
+                                <input type="text" id="loginUsername" class="form-control" required>
+                            </div>
+                            <div class="mb-2">
+                                <label>Password</label>
+                                <input type="password" id="loginPassword" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Master Data -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Impor Data</label>
+                <button class="btn btn-outline-danger btn-sm" id="btnResetAll">Reset Data Lokal</button>
+                <input type="file" id="fileImportExcel" accept=".xlsx, .xls" class="form-control" />
+                <div id="importInfo" class="small text-muted mt-1"></div>
+            </div>
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                <div id="dashboardContent" class="row g-3 justify-content-center"></div>
+            </div>
+            <div class="tab-pane fade" id="masterdata" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-4 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">Bangunan</div>
+                            <div class="card-body">
+                                <form id="formBangunan">
+                                    <div class="mb-2">
+                                        <input type="text" id="namaBangunan" class="form-control"
+                                            placeholder="Nama Bangunan" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">Tambah</button>
+                                </form>
+                                <hr>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <label>
+                                            Tampilkan
+                                            <select id="bangunanShowCount"
+                                                class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                                <option value="10">10</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                            data
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="bangunanSearchAll" class="form-control form-control-sm"
+                                            placeholder="Cari Bangunan...">
+                                    </div>
+                                </div>
+                                <ul id="listBangunan" class="list-group small"></ul>
+                                <div id="bangunanPaging" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">Ruangan</div>
+                            <div class="card-body">
+                                <form id="formRuangan">
+                                    <div class="mb-2">
+                                        <select id="bangunanRuang" class="form-select" required></select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" id="namaRuangan" class="form-control"
+                                            placeholder="Nama Ruangan" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-info w-100">Tambah</button>
+                                </form>
+                                <hr>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <label>
+                                            Tampilkan
+                                            <select id="ruanganShowCount"
+                                                class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                                <option value="10">10</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                            data
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="ruanganSearchAll" class="form-control form-control-sm"
+                                            placeholder="Cari Ruangan...">
+                                    </div>
+                                </div>
+                                <ul id="listRuangan" class="list-group small"></ul>
+                                <div id="ruanganPaging" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">Barang</div>
+                            <div class="card-body">
+                                <form id="formBarang">
+                                    <div class="mb-2">
+                                        <input type="text" id="namaBarang" class="form-control"
+                                            placeholder="Nama Barang" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" id="kategoriBarang" class="form-control"
+                                            placeholder="Kategori (opsional)">
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" id="spesifikasiBarang" class="form-control"
+                                            placeholder="Spesifikasi/Merk (opsional)">
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100">Tambah</button>
+                                </form>
+                                <hr>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <label>
+                                            Tampilkan
+                                            <select id="barangShowCount"
+                                                class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                                <option value="10">10</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                            data
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="text" id="barangSearchAll" class="form-control form-control-sm"
+                                            placeholder="Cari Barang...">
+                                    </div>
+                                </div>
+                                <ul id="listBarang" class="list-group small"></ul>
+                                <div id="barangPaging" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab Pencatatan Aset -->
+            <div class="tab-pane fade" id="aset" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-4 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">Catat Aset di Ruangan</div>
+                            <div class="card-body">
+                                <form id="formAsetRuangan">
+                                    <div class="mb-2">
+                                        <select id="ruanganAset" class="form-select" required></select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <select id="barangAset" class="form-select" required></select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="number" min="0" id="kebutuhanAset" class="form-control"
+                                            placeholder="Kebutuhan Barang (target)">
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="number" min="1" id="jumlahAset" class="form-control"
+                                            placeholder="Jumlah" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <select id="kondisiAset" class="form-select" required>
+                                            <option value="">Kondisi</option>
+                                            <option>Baik</option>
+                                            <option>Rusak</option>
+                                            <option>Diperbaiki</option>
+                                            <option>Hilang</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="text" id="catatanAset" class="form-control"
+                                            placeholder="Catatan (opsional)">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Catat</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-secondary text-white">Daftar Aset di Ruangan</div>
+                            <div class="card-body p-2">
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-4">
+                                        <select id="filterRuanganAset" class="form-select"></select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select id="filterKondisiAset" class="form-select">
+                                            <option value="">Semua Kondisi</option>
+                                            <option>Baik</option>
+                                            <option>Rusak</option>
+                                            <option>Diperbaiki</option>
+                                            <option>Hilang</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" id="searchAsetRuangan" class="form-control"
+                                            placeholder="Cari Nama Barang...">
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <label>
+                                            Tampilkan
+                                            <select id="asetShowCount" class="form-select form-select-sm d-inline-block"
+                                                style="width:auto;">
+                                                <option value="10">10</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                            data
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped" id="tabelAsetRuangan">
+                                        <thead>
+                                            <tr>
+                                                <th>Ruangan</th>
+                                                <th>Barang</th>
+                                                <th>Kebutuhan</th>
+                                                <th>Aktual</th>
+                                                <th>Selisih</th>
+                                                <th>Kondisi</th>
+                                                <th>Catatan</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div id="asetPaging" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab Laporan -->
+            <div class="tab-pane fade" id="laporan" role="tabpanel">
+                <div class="row">
+                    <div class="col-lg-6 col-12 mb-3">
+                        <div class="card">
+                            <div class="mb-2 d-flex gap-2">
+                                <button class="btn btn-success btn-sm" id="btnExportExcel">Export Excel</button>
+                                <button class="btn btn-danger btn-sm" id="btnExportPDF">Export PDF</button>
+                                <button class="btn btn-warning btn-sm" id="btnLaporanSelisih">Laporan Selisih</button>
+                            </div>
+                            <!-- Modal tampilkan data selisih -->
+                            <div class="modal fade" id="modalSelisihAset" tabindex="-1">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Laporan Aset Berselisih</h5>
+                                        </div>
+                                        <div class="modal-body" id="isiModalSelisih"></div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-success" id="btnExportSelisihExcel">Export Selisih ke
+                                                Excel</button>
+                                            <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-header bg-secondary text-white">Rekap Total Barang</div>
+                            <div class="mb-2">
+                                <input type="text" id="searchRekap" class="form-control form-control-sm">
+                                <select id="filterKategoriRekap" class="form-select form-select-sm mt-2">
+                                    <option value="">Semua Kategori</option>
+                                </select>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div>
+                                        <label>
+                                            Tampilkan
+                                            <select id="rekapShowCount"
+                                                class="form-select form-select-sm d-inline-block" style="width:auto;">
+                                                <option value="10">10</option>
+                                                <option value="30">30</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                            data
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered" id="tabelRekapBarang">
+                                        <thead>
+                                            <tr>
+                                                <th>Nama Barang</th>
+                                                <th>Kategori</th>
+                                                <th>Spesifikasi</th>
+                                                <th>Total Jumlah</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div id="rekapPaging" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-12 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">Daftar Barang per Ruangan</div>
+                            <div class="card-body p-2">
+                                <div class="mb-2">
+                                    <select id="filterLaporanRuangan" class="form-select"></select>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped" id="tabelBarangPerRuangan">
+                                        <thead>
+                                            <tr>
+                                                <th>Barang</th>
+                                                <th>Kategori</th>
+                                                <th>Spesifikasi</th>
+                                                <th>Jumlah</th>
+                                                <th>Kondisi</th>
+                                                <th>Catatan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <canvas id="chartAset" height="160"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab Sinkronisasi -->
+            <div class="tab-pane fade" id="sync" role="tabpanel">
+                <div class="mt-4 card">
+                    <div class="card-header bg-success text-white">Sinkronisasi ke Google Sheets</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <button class="btn btn-primary w-100" id="btnSyncSheet">Sinkronkan Sekarang</button>
+                        </div>
+                        <div id="syncResult" class="text-center"></div>
+                        <div class="small text-muted mt-2">Sinkronisasi akan mengirim semua data aset ke Google Sheets
+                            dengan timestamp.</div>
+                        <hr>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold">Backup & Restore Data</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-secondary" type="button" onclick="backupAllData()">Backup
+                                    Data</button>
+                                <input type="file" id="restoreFile" accept="application/json" style="display: none;"
+                                    onchange="handleRestoreFile(event)">
+                                <button class="btn btn-warning" type="button"
+                                    onclick="document.getElementById('restoreFile').click()">Restore Data</button>
+                            </div>
+                            <div id="backupRestoreInfo" class="small text-muted mt-1"></div>
+                        </div>
+                        <hr>
+                        <div class="mb-2">
+                            <button class="btn btn-danger" type="button" id="btnResetApp" onclick="resetAllAppData()"
+                                style="font-weight:bold;">
+                                <span class="me-1">&#9888;</span>Reset Aplikasi (Admin Saja)
+                            </button>
+                            <div id="resetAppInfo" class="small text-muted mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="userSection" class="mb-4" style="display:none;">
+                    <div class="mt-4 card">
+                        <div class="card-header bg-dark text-white">Manajemen User</div>
+                        <div class="card-body">
+                            <form id="formUser" class="row g-2">
+                                <div class="col-3"><input type="text" id="userUsername" class="form-control"
+                                        placeholder="Username" required></div>
+                                <div class="col-3"><input type="password" id="userPassword" class="form-control"
+                                        placeholder="Password" required></div>
+                                <div class="col-2">
+                                    <select id="userRole" class="form-select">
+                                        <option value="peminjam">Peminjam</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <select id="userKategori" class="form-select" multiple required>
+                                        <!-- Diisi otomatis dari kategori barang -->
+                                    </select>
+                                </div>
+                                <div class="col-1"><button type="submit" class="btn btn-success w-100">Tambah</button>
+                                </div>
+                            </form>
+                            <hr>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered" id="tabelUser">
+                                    <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Role</th>
+                                            <th>Kategori Akses</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div>
+                                    Tampilkan
+                                    <select id="userShowCount" class="form-select form-select-sm d-inline-block"
+                                        style="width:auto;">
+                                        <option value="10">10</option>
+                                        <option value="30">30</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    data
+                                </div>
+                                <input type="text" id="searchUser"
+                                    class="form-control form-control-sm d-inline-block ms-2" style="width:200px;"
+                                    placeholder="Cari Username...">
+                            </div>
+                            <div id="userPaging" class="mt-2"></div>
+                        </div>
+                    </div>
+                    <!-- Approval Table: hanya admin -->
+                    <div id="approvalTable" class="mt-3"></div>
+                </div>
+            </div>
+            <!-- Tab Peminjaman-->
+            <div class="tab-pane fade" id="peminjaman" role="tabpanel">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">Form Peminjaman Barang</div>
+                    <div class="card-body">
+                        <form id="formPinjam" class="row g-2">
+                            <div class="col-6">
+                                <select id="pinjamBarang" class="form-select" required></select>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" id="pinjamJumlah" class="form-control" placeholder="Jumlah" min="1"
+                                    required>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary w-100">Pinjam</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="mt-4 card">
+                    <div class="card-header bg-secondary text-white">Riwayat Peminjaman Anda</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered" id="tabelRiwayatPinjam">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Barang</th>
+                                        <th>Jumlah</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-success" id="btnSyncPinjamans">Sinkronkan Peminjaman/ Pengembalian ke
+                            Google Sheets</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Tab Peminjaman-->
+            <div class="tab-pane fade" id="auditlog" role="tabpanel">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">Audit Log</div>
+                    <div class="card-body p-2">
+                        <button class="btn btn-success btn-sm mb-2" id="btnExportAuditLog">Export ke Excel</button>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered" id="tabelAuditLog">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>User</th>
+                                        <th>Aksi</th>
+                                        <th>Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                Tampilkan
+                                <select id="auditLogShowCount" class="form-select form-select-sm d-inline-block"
+                                    style="width:auto;">
+                                    <option value="10">10</option>
+                                    <option value="30">30</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                data
+                            </div>
+                            <input type="text" id="searchAuditLog"
+                                class="form-control form-control-sm d-inline-block ms-2" style="width:200px;"
+                                placeholder="Cari...">
+                        </div>
+                        <div id="auditLogPaging" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <div id="toast-container" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 1080;"></div>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

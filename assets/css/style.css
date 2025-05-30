@@ -1,0 +1,71 @@
+body { background: #f6f7fa; }
+.card { border-radius: 18px; box-shadow: 0 2px 12px #0001; }
+.card-header { border-radius: 18px 18px 0 0 !important; }
+
+.dashboard-card {
+    border-radius: 1.5rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard-card:hover {
+    box-shadow: 0 8px 40px #0070f340;
+    transform: translateY(-4px) scale(1.025);
+}
+/* Responsif Form Manajemen User (Vertikal di Mobile, Horizontal di Desktop) */
+#userSection form#formUser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Desktop: horizontal, default bootstrap grid */
+@media (min-width: 992px) {
+  #userSection form#formUser > div {
+    flex: 0 0 auto;
+  }
+}
+
+/* Mobile: vertikal */
+@media (max-width: 991.98px) {
+  #userSection form#formUser {
+    flex-direction: column;
+  }
+  #userSection form#formUser > div {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Pastikan button tetap full width di mobile */
+#userSection form#formUser button[type="submit"] {
+  width: 100%;
+}
+
+/* Khusus Flex Responsive Manajemen User */
+.user-flex-form {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+@media (min-width: 992px) {
+  /* Desktop: tetap horizontal */
+  .user-flex-form > div {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 991.98px) {
+  /* Mobile: vertikal */
+  .user-flex-form {
+    flex-direction: column !important;
+  }
+  .user-flex-form > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .user-flex-form button[type="submit"] {
+    width: 100% !important;
+  }
+}
