@@ -94,6 +94,9 @@
                         <div class="card">
                             <div class="card-header bg-success text-white">Bangunan</div>
                             <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-primary btn-sm" id="btnSyncBangunan">Sync Bangunan</button>
+                                </div>
                                 <form id="formBangunan">
                                     <div class="mb-2">
                                         <input type="text" id="namaBangunan" class="form-control"
@@ -130,6 +133,9 @@
                         <div class="card">
                             <div class="card-header bg-info text-white">Ruangan</div>
                             <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-primary btn-sm" id="btnSyncRuangan">Sync Ruangan</button>
+                                </div>
                                 <form id="formRuangan">
                                     <div class="mb-2">
                                         <select id="bangunanRuang" class="form-select" required></select>
@@ -169,6 +175,9 @@
                         <div class="card">
                             <div class="card-header bg-warning text-dark">Barang</div>
                             <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-primary btn-sm" id="btnSyncBarang">Sync Barang</button>
+                                </div>
                                 <form id="formBarang">
                                     <div class="mb-2">
                                         <input type="text" id="namaBarang" class="form-control"
@@ -218,6 +227,9 @@
                         <div class="card">
                             <div class="card-header bg-primary text-white">Catat Aset di Ruangan</div>
                             <div class="card-body">
+                                <div class="mb-3">
+                                    <button class="btn btn-primary btn-sm" id="btnSyncAset">Sync Aset</button>
+                                </div>
                                 <form id="formAsetRuangan">
                                     <div class="mb-2">
                                         <select id="ruanganAset" class="form-select" required></select>
@@ -445,6 +457,9 @@
                     <div class="mt-4 card">
                         <div class="card-header bg-dark text-white">Manajemen User</div>
                         <div class="card-body">
+                            <div class="mb-3">
+                                <button class="btn btn-primary btn-sm" id="btnSyncUsers">Sync User</button>
+                            </div>
                             <form id="formUser" class="row g-2">
                                 <div class="col-3"><input type="text" id="userUsername" class="form-control"
                                         placeholder="Username" required></div>
@@ -506,6 +521,9 @@
                 <div class="card">
                     <div class="card-header bg-primary text-white">Form Peminjaman Barang</div>
                     <div class="card-body">
+                        <div class="mb-3">
+                            <button class="btn btn-primary btn-sm" id="btnSyncPinjamans">Sync Peminjaman</button>
+                        </div>
                         <form id="formPinjam" class="row g-2">
                             <div class="col-6">
                                 <select id="pinjamBarang" class="form-select" required></select>
@@ -537,17 +555,16 @@
                                 <tbody></tbody>
                             </table>
                         </div>
-                        <button class="btn btn-success" id="btnSyncPinjamans">Sinkronkan Peminjaman/ Pengembalian ke
-                            Google Sheets</button>
                     </div>
                 </div>
             </div>
-            <!-- Tab Peminjaman-->
+            <!-- Tab Audit Log-->
             <div class="tab-pane fade" id="auditlog" role="tabpanel">
                 <div class="card">
                     <div class="card-header bg-dark text-white">Audit Log</div>
                     <div class="card-body p-2">
                         <button class="btn btn-success btn-sm mb-2" id="btnExportAuditLog">Export ke Excel</button>
+                        <button class="btn btn-primary btn-sm mb-2" id="btnSyncAuditLog">Sync AuditLog</button>
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered" id="tabelAuditLog">
                                 <thead>
