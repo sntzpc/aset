@@ -3394,6 +3394,19 @@ function stopApprovalAutoRefresh() {
   }
 }
 
+// Auto close navbar when tab is clicked on mobile
+document.querySelectorAll('#navbarTabs .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        if (navbarCollapse.classList.contains('show')) {
+            const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+                toggle: false
+            });
+            bsCollapse.hide();
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   if (CURRENT_USER && CURRENT_USER.role === 'admin') {
     renderApprovalTable();

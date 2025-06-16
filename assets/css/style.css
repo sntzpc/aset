@@ -69,3 +69,23 @@ body { background: #f6f7fa; }
     width: 100% !important;
   }
 }
+
+/* Responsive Navbar */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background-color: #0d6efd;
+        padding: 1rem;
+        border-radius: 0 0 10px 10px;
+        margin-top: 0.5rem;
+    }
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+    .nav-link {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+    }
+    .nav-link:hover, .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}

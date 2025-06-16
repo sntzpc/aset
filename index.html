@@ -17,15 +17,43 @@
 
 <body>
     <!-- Navbar Brand -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Inventaris Aset SNTZ</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventaris Aset SNTZ</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTabs" aria-controls="navbarTabs" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTabs">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainTab" role="tablist">
+                <li class="nav-item" role="presentation" id="nav-dashboard">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#dashboard" role="tab">Dashboard</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-masterdata">
+                    <a class="nav-link" data-bs-toggle="tab" href="#masterdata" role="tab">Master Data</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-aset">
+                    <a class="nav-link" data-bs-toggle="tab" href="#aset" role="tab">Pencatatan Aset</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-laporan">
+                    <a class="nav-link" data-bs-toggle="tab" href="#laporan" role="tab">Pelaporan</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-sync">
+                    <a class="nav-link" data-bs-toggle="tab" href="#sync" role="tab">Sinkronisasi</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-peminjaman">
+                    <a class="nav-link" data-bs-toggle="tab" href="#peminjaman" role="tab">Peminjaman</a>
+                </li>
+                <li class="nav-item" role="presentation" id="nav-auditlog">
+                    <a class="nav-link" data-bs-toggle="tab" href="#auditlog" role="tab">Audit Log</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <div class="container py-4">
         <div id="userInfo" class="mb-3"></div>
-        <!-- Bootstrap Nav Tabs -->
+        <!-- Bootstrap Nav Tabs 
         <ul class="nav nav-tabs mb-3" id="mainTab" role="tablist">
             <li class="nav-item" role="presentation" id="nav-dashboard">
                 <a class="nav-link active" data-bs-toggle="tab" href="#dashboard" role="tab">Dashboard</a>
@@ -48,7 +76,7 @@
             <li class="nav-item" role="presentation" id="nav-auditlog">
                 <a class="nav-link" data-bs-toggle="tab" href="#auditlog" role="tab">Audit Log</a>
             </li>
-        </ul>
+        </ul> -->
 
         <!-- Tab Login -->
         <div class="modal fade" tabindex="-1" id="loginModal">
@@ -521,7 +549,7 @@
                 <div class="card">
                     <div class="card-header bg-primary text-white">Form Peminjaman Barang</div>
                     <div class="card-body">
-                        <div class="mb-3">
+                        <div class="mb-3" style="display: none;">
                             <button class="btn btn-primary btn-sm" id="btnSyncPinjamans">Sync Peminjaman</button>
                         </div>
                         <form id="formPinjam" class="row g-2">
@@ -564,7 +592,7 @@
                     <div class="card-header bg-dark text-white">Audit Log</div>
                     <div class="card-body p-2">
                         <button class="btn btn-success btn-sm mb-2" id="btnExportAuditLog">Export ke Excel</button>
-                        <button class="btn btn-primary btn-sm mb-2" id="btnSyncAuditLog">Sync AuditLog</button>
+                        <button class="btn btn-primary btn-sm mb-2" style="display: none;" id="btnSyncAuditLog">Sync AuditLog</button>
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered" id="tabelAuditLog">
                                 <thead>
