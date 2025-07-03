@@ -516,8 +516,38 @@ function filterBarangData(data, keyword) {
 }
 
 function refreshBarang() {
+  // --- Tambahkan CSS hanya sekali ---
+  if (!document.getElementById('antiwrap-style')) {
+    var style = document.createElement('style');
+    style.id = 'antiwrap-style';
+    style.innerHTML = `
+      .table-responsive-custom {
+        width: 100%;
+        overflow-x: auto;
+      }
+      #listBarang .list-group-item {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #listBarang {
+        min-width: 600px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // --- Bungkus #listBarang dalam .table-responsive-custom ---
+  var list = document.getElementById('listBarang');
+  if (list && !list.parentElement.classList.contains('table-responsive-custom')) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'table-responsive-custom';
+    list.parentNode.insertBefore(wrapper, list);
+    wrapper.appendChild(list);
+  }
+
+  // --- Sisa fungsi asli ---
   const barang = getData('barang');
-  const list = document.getElementById('listBarang');
   const showCount = parseInt(document.getElementById('barangShowCount')?.value || 10);
   const searchKeyword = document.getElementById('barangSearchAll')?.value || '';
   list.innerHTML = '';
@@ -549,6 +579,7 @@ function refreshBarang() {
   document.getElementById('barangPaging').innerHTML =
     renderPaging(barangCurrentPage, maxPage, 'setBarangPage');
 }
+
 
 function editBarang(id) {
   const barang = getData('barang');
@@ -1845,7 +1876,7 @@ async function renderDashboard() {
       <div class="card shadow-lg border-0">
         <div class="card-header bg-primary text-white fw-bold">${building} - ${room}</div>
         <div class="card-body p-2">
-          <div class="table-responsive">
+          <div class="table-responsive" style="white-space: nowrap;">
             <table class="table table-sm table-striped">
               <thead>
                 <tr>
