@@ -3179,9 +3179,15 @@ function sendTelegramNotif(msg) {
   });
 }
 
-// Helper async wait
-function wait(ms) {
-  return new Promise(res => setTimeout(res, ms));
+// Polling history hingga status sesuai, max 5x (total ~2 detik)
+async function getHistoryWithStatus(key, value, status) {
+  let target = null;
+  for (let i = 0; i < 5; i++) {
+    target = historyPinjamanData.find(h => h[key] === value && h["Status"] === status);
+    if (target) return target;
+    await new Promise(res => setTimeout(res, 400));
+  }
+  return null;
 }
 
 // 4) Setelah pengguna mengajukan pinjam → notif Telegram
@@ -3190,7 +3196,8 @@ document.getElementById('formPinjam').onsubmit = async function(e) {
   await originalFormPinjamSubmit.call(this, e);
   // Ambil nilai form
   const barangNama = document.getElementById('pinjamBarang').value;
-  const jumlah     = parseInt(document.getElementById('pinjamJumlah').value);
+  const jumlahRaw = document.getElementById('pinjamJumlah').value;
+  const jumlah = parseInt(jumlahRaw);
   if (!barangNama || isNaN(jumlah) || jumlah <= 0) {
     console.warn("Notifikasi batal: Nama/Jumlah pinjam kosong/0");
     return;
@@ -3217,7 +3224,8 @@ async function getTargetWithWait(key, value, status) {
 const originalApprovePinjaman = window.approvePinjaman;
 window.approvePinjaman = async function(timestampServer) {
   await originalApprovePinjaman.call(this, timestampServer);
-  const target = await getTargetWithWait("Timestamp Server", timestampServer, "Approved");
+  // Polling data
+  const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "Approved");
   if (!target) {
     console.warn("Notif Approve: data pinjaman tidak ditemukan/sudah berubah status");
     return;
@@ -3233,7 +3241,8 @@ window.approvePinjaman = async function(timestampServer) {
 const originalRejectPinjaman = window.rejectPinjaman;
 window.rejectPinjaman = async function(timestampServer) {
   await originalRejectPinjaman.call(this, timestampServer);
-  const target = await getTargetWithWait("Timestamp Server", timestampServer, "Rejected");
+  // Polling data
+  const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "Rejected");
   if (!target) {
     console.warn("Notif Reject: data pinjaman tidak ditemukan/sudah berubah status");
     return;
@@ -3249,7 +3258,8 @@ window.rejectPinjaman = async function(timestampServer) {
 const originalKembalikanPinjaman = window.kembalikanPinjaman;
 window.kembalikanPinjaman = async function(timestampServer) {
   await originalKembalikanPinjaman.call(this, timestampServer);
-  const target = await getTargetWithWait("Timestamp Server", timestampServer, "ReturnPending");
+  // Polling data
+  const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "ReturnPending");
   if (!target) {
     console.warn("Notif ReturnPending: data pinjaman tidak ditemukan/sudah berubah status");
     return;
@@ -3265,7 +3275,7 @@ window.kembalikanPinjaman = async function(timestampServer) {
 const originalProsesPengembalian = window.prosesPengembalian;
 window.prosesPengembalian = async function(timestampServer) {
   await originalProsesPengembalian.call(this, timestampServer);
-  // Cari record terbaru yang di‐append
+  // Cari record terbaru yang di-append (ini pola sudah benar & stabil)
   const entries = historyPinjamanData.filter(h =>
     h["Timestamp Server"] > timestampServer &&
     h["Username"]
