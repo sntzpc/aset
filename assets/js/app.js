@@ -2606,7 +2606,7 @@ async function renderApprovalTable() {
   // 4) Bangun HTML
   let html = `
     <h5 class="mb-2 text-primary">Approval Peminjaman Barang</h5>
-    <div class="table-responsive">
+    <div class="table-responsive" style="white-space: nowrap;">
       <table class="table table-sm table-bordered">
         <thead>
           <tr>
@@ -2662,7 +2662,7 @@ async function renderApprovalTable() {
   if (returnRequests.length > 0) {
     html += `
       <h5 class="mt-4 mb-2 text-warning">Permintaan Pengembalian</h5>
-      <div class="table-responsive">
+      <div class="table-responsive" style="white-space: nowrap;">
         <table class="table table-sm table-bordered">
           <thead>
             <tr>
