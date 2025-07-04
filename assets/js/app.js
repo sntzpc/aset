@@ -36,7 +36,7 @@ const BANGUNAN_SHEET_URL     = `https://sheets.googleapis.com/v4/spreadsheets/${
 const RUANGAN_SHEET_URL      = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Ruangan?key=${GOOGLE_API_KEY}`;
 const BARANG_SHEET_URL       = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Barang?key=${GOOGLE_API_KEY}`;
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxyvlSQoupgz6bk_c3CZfIQKJKgqtWPykVZKk9Y_g1o04ri5TdSN9tcebgLX0APR9rheg/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyCANF7ieGc4AHpnlHMO7CZU3cd6gWih9jzB9S09xXkQZic-QTPIByxE01HzRLJTHcZbg/exec';
 
 const TELEGRAM_BOT_TOKEN = '7520083448:AAHbf4QgZurXd8gbI2OnM0PxD8jK_zAXJ08';
 const TELEGRAM_CHAT_ID   = '968137878';
@@ -1150,10 +1150,10 @@ document.getElementById('formAsetRuangan').onsubmit = function (e) {
   e.preventDefault();
   const ruanganId = document.getElementById('ruanganAset').value;
   const barangId  = document.getElementById('barangAset').value;
+  const kebutuhan = parseInt(document.getElementById('kebutuhanAset').value) || 0;
   const jumlah    = parseInt(document.getElementById('jumlahAset').value);
   const kondisi   = document.getElementById('kondisiAset').value;
   const catatan   = document.getElementById('catatanAset').value.trim();
-  const kebutuhan = parseInt(document.getElementById('kebutuhanAset').value) || 0;
 
   if (!ruanganId || !barangId || !jumlah || !kondisi) return;
 
