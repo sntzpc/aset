@@ -787,127 +787,111 @@ document.getElementById('formBangunan').onsubmit = function (e) {
 
 
 // --- 5) Handler “Tambah/Edit Aset” ---
-document.getElementById('formAsetRuangan').onsubmit = async function(e) {
+// === UTILITY FUNCTIONS ===
+function getFormValues() {
+  return {
+    ruanganId: document.getElementById('ruanganAset').value,
+    barangId: document.getElementById('barangAset').value,
+    kebutuhan: parseInt(document.getElementById('kebutuhanAset').value) || 0,
+    jumlah: parseInt(document.getElementById('jumlahAset').value),
+    kondisi: document.getElementById('kondisiAset').value,
+    catatan: document.getElementById('catatanAset').value.trim()
+  };
+}
+
+function isValidAsetInput({ ruanganId, barangId, jumlah, kondisi }) {
+  return !!ruanganId && !!barangId && !isNaN(jumlah) && jumlah >= 0 && !!kondisi;
+}
+
+function lookupData(arr, key, value) {
+  return (arr || []).find(obj => obj[key] === value) || {};
+}
+
+// === MAIN SUBMIT HANDLER ===
+document.getElementById('formAsetRuangan').onsubmit = async function (e) {
   e.preventDefault();
+  const formEl = document.getElementById('formAsetRuangan');
+  const { ruanganId, barangId, kebutuhan, jumlah, kondisi, catatan } = getFormValues();
 
-  const ruanganIdEl = document.getElementById('ruanganAset');
-  const barangIdEl  = document.getElementById('barangAset');
-  const kebutuhanEl = document.getElementById('kebutuhanAset');
-  const jumlahEl    = document.getElementById('jumlahAset');
-  const kondisiEl   = document.getElementById('kondisiAset');
-  const catatanEl   = document.getElementById('catatanAset');
-
-  const ruanganId = ruanganIdEl.value;
-  const barangId  = barangIdEl.value;
-  const kebutuhan = parseInt(kebutuhanEl.value) || 0;
-  const jumlah    = parseInt(jumlahEl.value);
-  const kondisi   = kondisiEl.value;
-  const catatan   = catatanEl.value.trim();
-
-  if (!ruanganId || !barangId || !jumlah || !kondisi) {
+  if (!isValidAsetInput({ ruanganId, barangId, jumlah, kondisi })) {
     return alert('Lengkapi semua field yang wajib.');
   }
 
-  const ruanganArr   = getData('ruangan') || [];
-  const bangunanArr  = getData('bangunan') || [];
-  const barangArr    = getData('barang') || [];
+  // Ambil data referensi dari memory hasil fetch
+  const ruanganArr  = getData('ruangan') || [];
+  const bangunanArr = getData('bangunan') || [];
+  const barangArr   = getData('barang') || [];
 
-  const ruObj = ruanganArr.find(r => r.id === ruanganId);
-  if (!ruObj) return alert('⚠️ Ruangan tidak valid.');
-  const namaRu     = ruObj.nama;
-  const namaBangun = bangunanArr.find(b => b.id === ruObj.bangunanId)?.nama || '';
+  const ruObj = lookupData(ruanganArr, 'id', ruanganId);
+  const bObj  = lookupData(barangArr, 'id', barangId);
 
-  const bObj       = barangArr.find(b => b.id === barangId);
-  if (!bObj) return alert('⚠️ Barang tidak valid.');
-  const namaBarang = bObj.nama;
+  if (!ruObj?.id) return alert('⚠️ Ruangan tidak valid.');
+  if (!bObj?.id)  return alert('⚠️ Barang tidak valid.');
+
+  const namaRu     = ruObj.nama || '';
+  const namaBangun = lookupData(bangunanArr, 'id', ruObj.bangunanId).nama || '';
+  const namaBarang = bObj.nama || '';
   const kategori   = bObj.kategori || '';
   const spesifikasi = bObj.spesifikasi || '';
 
-  const formEl = document.getElementById('formAsetRuangan');
   const editId = formEl.getAttribute('data-edit-id');
+  const now = new Date().toISOString();
 
-  if (editId) {
-    const now = new Date().toISOString();
-    const payloadObj = {
-      action: 'update',
-      table: 'Daftar Aset',
-      data: [
-        {
-          'ID Aset': editId,
-          'Nama Bangunan': namaBangun,
-          'Nama Ruangan': namaRu,
-          'Nama Barang': namaBarang,
-          'Kategori': kategori,
-          'Spesifikasi': spesifikasi,
-          'Kebutuhan': kebutuhan,
-          'Jumlah': jumlah,
-          'Selisih': (jumlah - kebutuhan),
-          'Kondisi': kondisi,
-          'Catatan': catatan,
-          'Timestamp': now
-        }
-      ]
-    };
-
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadObj)
-    });
-
-    formEl.removeAttribute('data-edit-id');
-    document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Catat';
-    formEl.reset();
-    showToast('🖊️ Perubahan Aset berhasil disimpan.', 'success');
-  } else {
+  // Deteksi duplikat hanya saat tambah baru
+  if (!editId) {
     const existingSet = new Set(
-      asetSheetData.map(r => 
-        `${(r["Nama Bangunan"]||'')}|${(r["Nama Ruangan"]||'')}|${(r["Nama Barang"]||'')}`
+      (asetSheetData || []).map(r =>
+        `${(r["Nama Bangunan"] || '')}|${(r["Nama Ruangan"] || '')}|${(r["Nama Barang"] || '')}`
       )
     );
     const thisKey = `${namaBangun}|${namaRu}|${namaBarang}`;
     if (existingSet.has(thisKey)) {
       return alert('⚠️ Aset untuk Bangunan→Ruangan→Barang yang sama sudah ada.');
     }
-
-    const newId = uuid();
-    const now = new Date().toISOString();
-    const payloadObj = {
-      action: 'append',
-      table: 'Daftar Aset',
-      data: [
-        {
-          'ID Aset': newId,
-          'Nama Bangunan': namaBangun,
-          'Nama Ruangan': namaRu,
-          'Nama Barang': namaBarang,
-          'Kategori': kategori,
-          'Spesifikasi': spesifikasi,
-          'Kebutuhan': kebutuhan,
-          'Jumlah': jumlah,
-          'Selisih': (jumlah - kebutuhan),
-          'Kondisi': kondisi,
-          'Catatan': catatan,
-          'Timestamp': now
-        }
-      ]
-    };
-
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadObj)
-    });
-
-    showToast('➕ Aset baru berhasil ditambahkan.', 'success');
-    formEl.reset();
   }
 
+  // Siapkan payload
+  const idAset = editId || uuid();
+  const payloadObj = {
+    action: editId ? 'update' : 'append',
+    table: 'Daftar Aset',
+    data: [
+      {
+        'ID Aset': idAset,
+        'Nama Bangunan': namaBangun,
+        'Nama Ruangan': namaRu,
+        'Nama Barang': namaBarang,
+        'Kategori': kategori,
+        'Spesifikasi': spesifikasi,
+        'Kebutuhan': kebutuhan,
+        'Jumlah': jumlah,
+        'Selisih': jumlah - kebutuhan,
+        'Kondisi': kondisi,
+        'Catatan': catatan,
+        'Timestamp': now
+      }
+    ]
+  };
+
+  await fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payloadObj)
+  });
+
+  // Reset form & tampilan
+  formEl.removeAttribute('data-edit-id');
+  document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Catat';
+  formEl.reset();
+
+  showToast(editId ? '🖊️ Perubahan Aset berhasil disimpan.' : '➕ Aset baru berhasil ditambahkan.', 'success');
+
+  // Refresh data table
   await fetchAsetFromSheet();
   refreshAsetRuanganTable();
 };
+
 
 // --- Hapus Bangunan ---
 window.deleteBangunan = function (id) {
@@ -1144,120 +1128,6 @@ function editAsetRuangan(idAset) {
   formEl.setAttribute('data-edit-id', idAset);
   document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Simpan Perubahan';
 }
-
-// 2.4.2. Handler formAsetRuangan
-document.getElementById('formAsetRuangan').onsubmit = function (e) {
-  e.preventDefault();
-  const ruanganId = document.getElementById('ruanganAset').value;
-  const barangId  = document.getElementById('barangAset').value;
-  const kebutuhan = parseInt(document.getElementById('kebutuhanAset').value) || 0;
-  const jumlah    = parseInt(document.getElementById('jumlahAset').value);
-  const kondisi   = document.getElementById('kondisiAset').value;
-  const catatan   = document.getElementById('catatanAset').value.trim();
-
-  if (!ruanganId || !barangId || !jumlah || !kondisi) return;
-
-  const formEl = document.getElementById('formAsetRuangan');
-  const editId = formEl.getAttribute('data-edit-id');
-
-  if (editId) {
-    let asetRuangan = getData('asetruangan');
-    const idx = asetRuangan.findIndex(a => a.id === editId);
-    if (idx > -1) {
-      asetRuangan[idx].ruanganId = ruanganId;
-      asetRuangan[idx].barangId  = barangId;
-      asetRuangan[idx].kebutuhan = kebutuhan;
-      asetRuangan[idx].jumlah    = jumlah;
-      asetRuangan[idx].kondisi   = kondisi;
-      asetRuangan[idx].catatan   = catatan;
-      setData('asetruangan', asetRuangan);
-    }
-    const now = new Date().toISOString();
-    const bObj = getData('barang').find(x => x.id === barangId) || {};
-    const rObj = getData('ruangan').find(x => x.id === ruanganId) || {};
-    const namaBangunan = getData('bangunan').find(bg => bg.id === rObj.bangunanId)?.nama || '';
-    const payloadObj = {
-      action: 'update',
-      table: 'Daftar Aset',
-      data: [
-        {
-          'ID Aset': editId,
-          'Nama Bangunan': namaBangunan,
-          'Nama Ruangan': rObj.nama || '',
-          'Nama Barang': bObj.nama || '',
-          'Kategori': bObj.kategori || '',
-          'Spesifikasi': bObj.spesifikasi || '',
-          'Kebutuhan': kebutuhan,
-          'Jumlah': jumlah,
-          'Selisih': kebutuhan ? (jumlah - kebutuhan) : 0,
-          'Kondisi': kondisi,
-          'Catatan': catatan,
-          'Timestamp': now
-        }
-      ]
-    };
-    fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadObj)
-    });
-
-    formEl.removeAttribute('data-edit-id');
-    document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Catat';
-    formEl.reset();
-    logAudit('Edit Aset', `ID Aset: ${editId}`);
-  } else {
-    let asetRuangan = getData('asetruangan');
-    const newId = uuid();
-    asetRuangan.push({
-      id: newId,
-      ruanganId,
-      barangId,
-      kebutuhan,
-      jumlah,
-      kondisi,
-      catatan
-    });
-    setData('asetruangan', asetRuangan);
-
-    const now = new Date().toISOString();
-    const bObj = getData('barang').find(x => x.id === barangId) || {};
-    const rObj = getData('ruangan').find(x => x.id === ruanganId) || {};
-    const namaBangunan = getData('bangunan').find(bg => bg.id === rObj.bangunanId)?.nama || '';
-    const payloadObj = {
-      action: 'append',
-      table: 'Daftar Aset',
-      data: [
-        {
-          'ID Aset': newId,
-          'Nama Bangunan': namaBangunan,
-          'Nama Ruangan': rObj.nama || '',
-          'Nama Barang': bObj.nama || '',
-          'Kategori': bObj.kategori || '',
-          'Spesifikasi': bObj.spesifikasi || '',
-          'Kebutuhan': kebutuhan,
-          'Jumlah': jumlah,
-          'Selisih': kebutuhan ? (jumlah - kebutuhan) : 0,
-          'Kondisi': kondisi,
-          'Catatan': catatan,
-          'Timestamp': now
-        }
-      ]
-    };
-    fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payloadObj)
-    });
-
-    logAudit('Tambah Aset', `ID Aset: ${newId}`);
-    formEl.reset();
-  }
-
-  refreshAsetRuanganTable();
-};
 
 
 function refreshRuanganAsetDropdowns() {
