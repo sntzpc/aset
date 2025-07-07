@@ -19,8 +19,8 @@ function parseSheetRows(values) {
 function hasLaterStatus(historyData, entry, laterStatuses) {
   const thisTime = new Date(entry["Timestamp Server"]).getTime();
   return historyData.some(x =>
-    x["Username"]     === entry["Username"] &&
-    x["Nama Barang"]  === entry["Nama Barang"] &&
+    x["Username"] === entry["Username"] &&
+    x["Nama Barang"] === entry["Nama Barang"] &&
     parseInt(x["Jumlah"], 10) === parseInt(entry["Jumlah"], 10) &&
     laterStatuses.includes(x["Status"]) &&
     new Date(x["Timestamp Server"]).getTime() > thisTime
@@ -28,20 +28,20 @@ function hasLaterStatus(historyData, entry, laterStatuses) {
 }
 
 const DASHBOARD_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Daftar%20Aset?key=${GOOGLE_API_KEY}`;
-const DAFTAR_ASET_SHEET_URL  = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Daftar%20Aset?key=${GOOGLE_API_KEY}`;
+const DAFTAR_ASET_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Daftar%20Aset?key=${GOOGLE_API_KEY}`;
 const HISTORY_PINJAM_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/History%20Peminjaman?key=${GOOGLE_API_KEY}`;
-const MASTER_SHEET_URL       = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Master%20Barang?key=${GOOGLE_API_KEY}`;
-const AUNTH_API_URL          = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Aunth?key=${GOOGLE_API_KEY}`;
-const BANGUNAN_SHEET_URL     = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Bangunan?key=${GOOGLE_API_KEY}`;
-const RUANGAN_SHEET_URL      = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Ruangan?key=${GOOGLE_API_KEY}`;
-const BARANG_SHEET_URL       = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Barang?key=${GOOGLE_API_KEY}`;
+const MASTER_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Master%20Barang?key=${GOOGLE_API_KEY}`;
+const AUNTH_API_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Aunth?key=${GOOGLE_API_KEY}`;
+const BANGUNAN_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Bangunan?key=${GOOGLE_API_KEY}`;
+const RUANGAN_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Ruangan?key=${GOOGLE_API_KEY}`;
+const BARANG_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Barang?key=${GOOGLE_API_KEY}`;
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyCANF7ieGc4AHpnlHMO7CZU3cd6gWih9jzB9S09xXkQZic-QTPIByxE01HzRLJTHcZbg/exec';
 
 const TELEGRAM_BOT_TOKEN = '7520083448:AAHbf4QgZurXd8gbI2OnM0PxD8jK_zAXJ08';
-const TELEGRAM_CHAT_ID   = '968137878';
+const TELEGRAM_CHAT_ID = '968137878';
 
-let daftarAsetData      = [];
+let daftarAsetData = [];
 let historyPinjamanData = [];
 
 let loginModalBS;
@@ -49,7 +49,10 @@ let loginModalBS;
 function showLoginModal() {
   if (!loginModalBS) {
     const el = document.getElementById('loginModal');
-    if (el) loginModalBS = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
+    if (el) loginModalBS = new bootstrap.Modal(el, {
+      backdrop: 'static',
+      keyboard: false
+    });
   }
   if (loginModalBS) loginModalBS.show();
 }
@@ -57,7 +60,10 @@ function showLoginModal() {
 function hideLoginModal() {
   if (!loginModalBS) {
     const el = document.getElementById('loginModal');
-    if (el) loginModalBS = new bootstrap.Modal(el, { backdrop: 'static', keyboard: false });
+    if (el) loginModalBS = new bootstrap.Modal(el, {
+      backdrop: 'static',
+      keyboard: false
+    });
   }
   if (loginModalBS) loginModalBS.hide();
 }
@@ -93,10 +99,10 @@ function renderPaging(current, maxPage, setPageFuncName) {
   } else {
     pages.push(1);
     if (current > 4) pages.push('...');
-    for (let i = Math.max(2, current-1); i <= Math.min(maxPage-1, current+1); i++) {
+    for (let i = Math.max(2, current - 1); i <= Math.min(maxPage - 1, current + 1); i++) {
       pages.push(i);
     }
-    if (current < maxPage-3) pages.push('...');
+    if (current < maxPage - 3) pages.push('...');
     pages.push(maxPage);
   }
 
@@ -133,8 +139,8 @@ function refreshBangunan() {
   const bangunan = getData('bangunan');
   const list = document.getElementById('listBangunan');
   const select = document.getElementById('bangunanRuang');
-  const showCount = parseInt(document.getElementById('bangunanShowCount')?.value || 10);
-  const searchKeyword = document.getElementById('bangunanSearchAll')?.value || '';
+  const showCount = parseInt(document.getElementById('bangunanShowCount') ?.value || 10);
+  const searchKeyword = document.getElementById('bangunanSearchAll') ?.value || '';
   list.innerHTML = '';
   select.innerHTML = '<option value="">Pilih Bangunan</option>';
 
@@ -160,7 +166,7 @@ function refreshBangunan() {
   document.getElementById('bangunanPaging').innerHTML =
     renderPaging(bangunanCurrentPage, maxPage, 'setBangunanPage');
 }
-window.setBangunanPage = function(page) {
+window.setBangunanPage = function (page) {
   bangunanCurrentPage = page;
   refreshBangunan();
 };
@@ -184,7 +190,7 @@ document.getElementById('btnSyncBangunan').onclick = async function () {
 
   try {
     const resp = await fetch(BANGUNAN_SHEET_URL);
-    const raw  = await resp.json();
+    const raw = await resp.json();
     const existingRows = parseSheetRows(raw.values || []);
     const existingNamesSet = new Set(existingRows.map(r => (r['Nama'] || '').toString().trim()));
 
@@ -259,8 +265,8 @@ function refreshRuangan() {
   const ruangan = getData('ruangan');
   const bangunan = getData('bangunan');
   const list = document.getElementById('listRuangan');
-  const showCount = parseInt(document.getElementById('ruanganShowCount')?.value || 10);
-  const searchKeyword = document.getElementById('ruanganSearchAll')?.value || '';
+  const showCount = parseInt(document.getElementById('ruanganShowCount') ?.value || 10);
+  const searchKeyword = document.getElementById('ruanganSearchAll') ?.value || '';
   list.innerHTML = '';
 
   let dataTampil = filterRuanganData(ruangan, searchKeyword);
@@ -272,7 +278,7 @@ function refreshRuangan() {
   const rowsPage = dataTampil.slice(startIdx, startIdx + showCount);
 
   rowsPage.forEach(r => {
-    const namaBangunan = bangunan.find(b => b.id === r.bangunanId)?.nama || '-';
+    const namaBangunan = bangunan.find(b => b.id === r.bangunanId) ?.nama || '-';
     list.innerHTML += `
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <div>${namaBangunan} – ${r.nama}</div>
@@ -287,7 +293,7 @@ function refreshRuangan() {
     renderPaging(ruanganCurrentPage, maxPage, 'setRuanganPage');
 }
 
-window.setRuanganPage = function(page) {
+window.setRuanganPage = function (page) {
   ruanganCurrentPage = page;
   refreshRuangan();
 }
@@ -316,9 +322,9 @@ async function fetchBarangFromSheet() {
     const raw = await response.json();
     const rowsObj = parseSheetRows(raw.values || []);
     const arrForLocal = rowsObj.map(r => ({
-      id:          r['ID'],
-      nama:        r['Nama'],
-      kategori:    r['Kategori'],
+      id: r['ID'],
+      nama: r['Nama'],
+      kategori: r['Kategori'],
       spesifikasi: r['Spesifikasi']
     }));
     setData('barang', arrForLocal);
@@ -376,7 +382,7 @@ document.getElementById('btnSyncRuangan').onclick = async function () {
     const existingKeys = new Set(
       rowsSheet.map(r => {
         const bid = (r['Bangunan ID'] || '').toString().trim();
-        const n   = (r['Nama'] || '').toString().trim().toLowerCase();
+        const n = (r['Nama'] || '').toString().trim().toLowerCase();
         return bid + '|' + n;
       })
     );
@@ -388,10 +394,10 @@ document.getElementById('btnSyncRuangan').onclick = async function () {
         return !existingKeys.has(keyLocal);
       })
       .map(r => ({
-        'ID':            r.id,
-        'Nama':          r.nama,
-        'Bangunan ID':   r.bangunanId,
-        'Timestamp':     nowTs
+        'ID': r.id,
+        'Nama': r.nama,
+        'Bangunan ID': r.bangunanId,
+        'Timestamp': nowTs
       }));
 
     if (toSync.length === 0) {
@@ -401,12 +407,14 @@ document.getElementById('btnSyncRuangan').onclick = async function () {
 
     await fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
-      body:   JSON.stringify({
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         action: 'append',
-        table:  'Ruangan',
-        data:   toSync
+        table: 'Ruangan',
+        data: toSync
       })
     });
     alert(`✅ ${toSync.length} ruangan baru berhasil disinkronkan ke Google Sheets.`);
@@ -429,7 +437,7 @@ function editRuangan(id) {
 }
 
 // 2.2.2. Handler formRuangan
-document.getElementById('formRuangan').onsubmit = function(e) {
+document.getElementById('formRuangan').onsubmit = function (e) {
   e.preventDefault();
   const bangunanId = document.getElementById('bangunanRuang').value;
   const nama = document.getElementById('namaRuangan').value.trim();
@@ -451,19 +459,19 @@ document.getElementById('formRuangan').onsubmit = function(e) {
     const payloadObj = {
       action: 'update',
       table: 'Ruangan',
-      data: [
-        {
-          'ID': editId,
-          'Nama': nama,
-          'Bangunan ID': bangunanId,
-          'Timestamp': now
-        }
-      ]
+      data: [{
+        'ID': editId,
+        'Nama': nama,
+        'Bangunan ID': bangunanId,
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadObj)
     });
 
@@ -475,26 +483,30 @@ document.getElementById('formRuangan').onsubmit = function(e) {
     // === CREATE ===
     const ruangan = getData('ruangan');
     const newId = uuid();
-    ruangan.push({ id: newId, bangunanId, nama });
+    ruangan.push({
+      id: newId,
+      bangunanId,
+      nama
+    });
     setData('ruangan', ruangan);
 
     const now = new Date().toISOString();
     const payloadObj = {
       action: 'append',
       table: 'Ruangan',
-      data: [
-        {
-          'ID': newId,
-          'Nama': nama,
-          'Bangunan ID': bangunanId,
-          'Timestamp': now
-        }
-      ]
+      data: [{
+        'ID': newId,
+        'Nama': nama,
+        'Bangunan ID': bangunanId,
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadObj)
     });
     logAudit('Tambah Ruangan', `Ruangan: ${nama}`);
@@ -548,8 +560,8 @@ function refreshBarang() {
 
   // --- Sisa fungsi asli ---
   const barang = getData('barang');
-  const showCount = parseInt(document.getElementById('barangShowCount')?.value || 10);
-  const searchKeyword = document.getElementById('barangSearchAll')?.value || '';
+  const showCount = parseInt(document.getElementById('barangShowCount') ?.value || 10);
+  const searchKeyword = document.getElementById('barangSearchAll') ?.value || '';
   list.innerHTML = '';
 
   let dataTampil = filterBarangData(barang, searchKeyword);
@@ -585,8 +597,8 @@ function editBarang(id) {
   const barang = getData('barang');
   const b = barang.find(x => x.id === id);
   if (!b) return;
-  document.getElementById('namaBarang').value        = b.nama;
-  document.getElementById('kategoriBarang').value    = b.kategori || '';
+  document.getElementById('namaBarang').value = b.nama;
+  document.getElementById('kategoriBarang').value = b.kategori || '';
   document.getElementById('spesifikasiBarang').value = b.spesifikasi || '';
   const formEl = document.getElementById('formBarang');
   formEl.setAttribute('data-edit-id', id);
@@ -596,44 +608,44 @@ function editBarang(id) {
 // 6.2. Handler formBarang.submit → Create / Update
 document.getElementById('formBarang').onsubmit = async function (e) {
   e.preventDefault();
-  const nama        = document.getElementById('namaBarang').value.trim();
-  const kategori    = document.getElementById('kategoriBarang').value.trim();
+  const nama = document.getElementById('namaBarang').value.trim();
+  const kategori = document.getElementById('kategoriBarang').value.trim();
   const spesifikasi = document.getElementById('spesifikasiBarang').value.trim();
   if (!nama) return;
 
-  const formEl   = document.getElementById('formBarang');
-  const editId   = formEl.getAttribute('data-edit-id');
-  const nowTs    = new Date().toISOString();
+  const formEl = document.getElementById('formBarang');
+  const editId = formEl.getAttribute('data-edit-id');
+  const nowTs = new Date().toISOString();
 
   if (editId) {
     // === UPDATE ===
     let barangArr = getData('barang');
     const idx = barangArr.findIndex(x => x.id === editId);
     if (idx > -1) {
-      barangArr[idx].nama        = nama;
-      barangArr[idx].kategori    = kategori;
+      barangArr[idx].nama = nama;
+      barangArr[idx].kategori = kategori;
       barangArr[idx].spesifikasi = spesifikasi;
       setData('barang', barangArr);
     }
 
     const payloadObj = {
       action: 'update',
-      table:  'Barang',
-      data: [
-        {
-          'ID':          editId,
-          'Nama':        nama,
-          'Kategori':    kategori,
-          'Spesifikasi': spesifikasi,
-          'Timestamp':   nowTs
-        }
-      ]
+      table: 'Barang',
+      data: [{
+        'ID': editId,
+        'Nama': nama,
+        'Kategori': kategori,
+        'Spesifikasi': spesifikasi,
+        'Timestamp': nowTs
+      }]
     };
     await fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
-      body:   JSON.stringify(payloadObj)
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payloadObj)
     });
 
     formEl.removeAttribute('data-edit-id');
@@ -641,32 +653,36 @@ document.getElementById('formBarang').onsubmit = async function (e) {
     formEl.reset();
     refreshBarang();
     logAudit('Edit Barang', `Barang: ${nama} (ID: ${editId})`);
-  } 
-  else {
+  } else {
     // === CREATE (Tambah Baru) ===
     let barangArr = getData('barang');
     const newId = uuid();
-    barangArr.push({ id: newId, nama, kategori, spesifikasi });
+    barangArr.push({
+      id: newId,
+      nama,
+      kategori,
+      spesifikasi
+    });
     setData('barang', barangArr);
 
     const payloadObj = {
       action: 'append',
-      table:  'Barang',
-      data: [
-        {
-          'ID':          newId,
-          'Nama':        nama,
-          'Kategori':    kategori,
-          'Spesifikasi': spesifikasi,
-          'Timestamp':   nowTs
-        }
-      ]
+      table: 'Barang',
+      data: [{
+        'ID': newId,
+        'Nama': nama,
+        'Kategori': kategori,
+        'Spesifikasi': spesifikasi,
+        'Timestamp': nowTs
+      }]
     };
     await fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
-      body:   JSON.stringify(payloadObj)
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payloadObj)
     });
 
     refreshBarang();
@@ -676,7 +692,7 @@ document.getElementById('formBarang').onsubmit = async function (e) {
 };
 
 
-window.setBarangPage = function(page) {
+window.setBarangPage = function (page) {
   barangCurrentPage = page;
   refreshBarang();
 }
@@ -704,9 +720,9 @@ async function syncToGoogleSheet(tableName, arrayData, onSuccess) {
   };
 
   try {
-    document.getElementById('syncResult')?.insertAdjacentHTML('beforeend',
+    document.getElementById('syncResult') ?.insertAdjacentHTML('beforeend',
       `<div class="small text-info">Menyinkronkan "${tableName}"…</div>`);
-    
+
     await fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -743,15 +759,19 @@ document.getElementById('formBangunan').onsubmit = function (e) {
     const now = new Date().toISOString();
     const payloadObj = {
       action: 'update',
-      table:  'Bangunan',
-      data: [
-        { 'ID': editId, 'Nama': nama, 'Timestamp': now }
-      ]
+      table: 'Bangunan',
+      data: [{
+        'ID': editId,
+        'Nama': nama,
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadObj)
     });
     formEl.removeAttribute('data-edit-id');
@@ -761,20 +781,27 @@ document.getElementById('formBangunan').onsubmit = function (e) {
     // === CREATE Bangunan Baru ===
     const bangunan = getData('bangunan');
     const newId = uuid();
-    bangunan.push({ id: newId, nama });
+    bangunan.push({
+      id: newId,
+      nama
+    });
     setData('bangunan', bangunan);
     const now = new Date().toISOString();
     const payloadObj = {
       action: 'append',
       table: 'Bangunan',
-      data: [
-        { 'ID': newId, 'Nama': nama, 'Timestamp': now }
-      ]
+      data: [{
+        'ID': newId,
+        'Nama': nama,
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers:{ 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadObj)
     });
     formEl.reset();
@@ -799,7 +826,12 @@ function getFormValues() {
   };
 }
 
-function isValidAsetInput({ ruanganId, barangId, jumlah, kondisi }) {
+function isValidAsetInput({
+  ruanganId,
+  barangId,
+  jumlah,
+  kondisi
+}) {
   return !!ruanganId && !!barangId && !isNaN(jumlah) && jumlah >= 0 && !!kondisi;
 }
 
@@ -811,27 +843,39 @@ function lookupData(arr, key, value) {
 document.getElementById('formAsetRuangan').onsubmit = async function (e) {
   e.preventDefault();
   const formEl = document.getElementById('formAsetRuangan');
-  const { ruanganId, barangId, kebutuhan, jumlah, kondisi, catatan } = getFormValues();
+  const {
+    ruanganId,
+    barangId,
+    kebutuhan,
+    jumlah,
+    kondisi,
+    catatan
+  } = getFormValues();
 
-  if (!isValidAsetInput({ ruanganId, barangId, jumlah, kondisi })) {
+  if (!isValidAsetInput({
+      ruanganId,
+      barangId,
+      jumlah,
+      kondisi
+    })) {
     return alert('Lengkapi semua field yang wajib.');
   }
 
   // Ambil data referensi dari memory hasil fetch
-  const ruanganArr  = getData('ruangan') || [];
+  const ruanganArr = getData('ruangan') || [];
   const bangunanArr = getData('bangunan') || [];
-  const barangArr   = getData('barang') || [];
+  const barangArr = getData('barang') || [];
 
   const ruObj = lookupData(ruanganArr, 'id', ruanganId);
-  const bObj  = lookupData(barangArr, 'id', barangId);
+  const bObj = lookupData(barangArr, 'id', barangId);
 
-  if (!ruObj?.id) return alert('⚠️ Ruangan tidak valid.');
-  if (!bObj?.id)  return alert('⚠️ Barang tidak valid.');
+  if (!ruObj ?.id) return alert('⚠️ Ruangan tidak valid.');
+  if (!bObj ?.id) return alert('⚠️ Barang tidak valid.');
 
-  const namaRu     = ruObj.nama || '';
+  const namaRu = ruObj.nama || '';
   const namaBangun = lookupData(bangunanArr, 'id', ruObj.bangunanId).nama || '';
   const namaBarang = bObj.nama || '';
-  const kategori   = bObj.kategori || '';
+  const kategori = bObj.kategori || '';
   const spesifikasi = bObj.spesifikasi || '';
 
   const editId = formEl.getAttribute('data-edit-id');
@@ -855,28 +899,28 @@ document.getElementById('formAsetRuangan').onsubmit = async function (e) {
   const payloadObj = {
     action: editId ? 'update' : 'append',
     table: 'Daftar Aset',
-    data: [
-      {
-        'ID Aset': idAset,
-        'Nama Bangunan': namaBangun,
-        'Nama Ruangan': namaRu,
-        'Nama Barang': namaBarang,
-        'Kategori': kategori,
-        'Spesifikasi': spesifikasi,
-        'Kebutuhan': kebutuhan,
-        'Jumlah': jumlah,
-        'Selisih': jumlah - kebutuhan,
-        'Kondisi': kondisi,
-        'Catatan': catatan,
-        'Timestamp': now
-      }
-    ]
+    data: [{
+      'ID Aset': idAset,
+      'Nama Bangunan': namaBangun,
+      'Nama Ruangan': namaRu,
+      'Nama Barang': namaBarang,
+      'Kategori': kategori,
+      'Spesifikasi': spesifikasi,
+      'Kebutuhan': kebutuhan,
+      'Jumlah': jumlah,
+      'Selisih': jumlah - kebutuhan,
+      'Kondisi': kondisi,
+      'Catatan': catatan,
+      'Timestamp': now
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payloadObj)
   });
 
@@ -908,14 +952,16 @@ window.deleteBangunan = function (id) {
   const payloadObj = {
     action: 'delete',
     table: 'Bangunan',
-    data: [
-      { 'ID': id }
-    ]
+    data: [{
+      'ID': id
+    }]
   };
   fetch(GAS_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payloadObj)
   });
 
@@ -926,7 +972,7 @@ window.deleteBangunan = function (id) {
 
 
 // --- Hapus Ruangan ---
-window.deleteRuangan = function(id) {
+window.deleteRuangan = function (id) {
   if (!confirm('Yakin hapus ruangan?')) return;
   let ruangan = getData('ruangan');
   const r = ruangan.find(x => x.id === id);
@@ -936,14 +982,16 @@ window.deleteRuangan = function(id) {
   const payloadObj = {
     action: 'delete',
     table: 'Ruangan',
-    data: [
-      {'ID': id}
-    ]
+    data: [{
+      'ID': id
+    }]
   };
   fetch(GAS_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payloadObj)
   });
 
@@ -962,14 +1010,18 @@ window.deleteBarang = async function (id) {
 
   const payloadObj = {
     action: 'delete',
-    table:  'Barang',
-    data:   [ { 'ID': id } ]
+    table: 'Barang',
+    data: [{
+      'ID': id
+    }]
   };
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payloadObj)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payloadObj)
   });
 
   refreshBarang();
@@ -1015,42 +1067,42 @@ function refreshAsetRuanganTable() {
 
   let data = Array.isArray(asetSheetData) ? [...asetSheetData] : [];
 
-  const filterRuanganId = document.getElementById('filterRuanganAset')?.value || '';
-  const filterKondisi   = document.getElementById('filterKondisiAset')?.value || '';
-  const searchKeyword   = document.getElementById('searchAsetRuangan')?.value.toLowerCase() || '';
+  const filterRuanganId = document.getElementById('filterRuanganAset') ?.value || '';
+  const filterKondisi = document.getElementById('filterKondisiAset') ?.value || '';
+  const searchKeyword = document.getElementById('searchAsetRuangan') ?.value.toLowerCase() || '';
 
-  const ruanganArr   = getData('ruangan') || [];
+  const ruanganArr = getData('ruangan') || [];
   const bangunanArr = getData('bangunan') || [];
 
   if (filterRuanganId && filterRuanganId !== 'all') {
-    const namaRuFilter = ruanganArr.find(r => r.id === filterRuanganId)?.nama || '';
+    const namaRuFilter = ruanganArr.find(r => r.id === filterRuanganId) ?.nama || '';
     data = data.filter(d => (d["Nama Ruangan"] || '') === namaRuFilter);
   }
   if (filterKondisi) {
-    data = data.filter(d => ((d["Kondisi"]||'').toLowerCase() === filterKondisi.toLowerCase()));
+    data = data.filter(d => ((d["Kondisi"] || '').toLowerCase() === filterKondisi.toLowerCase()));
   }
   if (searchKeyword) {
-    data = data.filter(d => (d["Nama Barang"]||'').toLowerCase().includes(searchKeyword));
+    data = data.filter(d => (d["Nama Barang"] || '').toLowerCase().includes(searchKeyword));
   }
 
-  const showCount = parseInt(document.getElementById('asetShowCount')?.value || '10');
+  const showCount = parseInt(document.getElementById('asetShowCount') ?.value || '10');
   const totalRows = data.length;
-  const maxPage   = Math.max(1, Math.ceil(totalRows / showCount));
+  const maxPage = Math.max(1, Math.ceil(totalRows / showCount));
   if (asetCurrentPage > maxPage) asetCurrentPage = 1;
   const startIdx = (asetCurrentPage - 1) * showCount;
   const rowsPage = data.slice(startIdx, startIdx + showCount);
 
   tbody.innerHTML = '';
   rowsPage.forEach(row => {
-    const idAset      = row["ID Aset"];
-    const namaBangun  = row["Nama Bangunan"] || '-';
-    const namaRu      = row["Nama Ruangan"] || '-';
-    const namaBarang  = row["Nama Barang"] || '-';
-    const kebutuhan   = row["Kebutuhan"] || 0;
-    const jumlah      = row["Jumlah"] || 0;
-    const selisih     = (jumlah - kebutuhan);
-    const kondisi     = row["Kondisi"] || '';
-    const catatan     = row["Catatan"] || '';
+    const idAset = row["ID Aset"];
+    const namaBangun = row["Nama Bangunan"] || '-';
+    const namaRu = row["Nama Ruangan"] || '-';
+    const namaBarang = row["Nama Barang"] || '-';
+    const kebutuhan = row["Kebutuhan"] || 0;
+    const jumlah = row["Jumlah"] || 0;
+    const selisih = (jumlah - kebutuhan);
+    const kondisi = row["Kondisi"] || '';
+    const catatan = row["Catatan"] || '';
 
     tbody.innerHTML += `
       <tr>
@@ -1073,23 +1125,23 @@ function refreshAsetRuanganTable() {
     renderPaging(asetCurrentPage, maxPage, 'setAsetPage');
 }
 
-window.setAsetPage = function(page) {
+window.setAsetPage = function (page) {
   asetCurrentPage = page;
   refreshAsetRuanganTable();
 };
-document.getElementById('asetShowCount').onchange = function() {
+document.getElementById('asetShowCount').onchange = function () {
   asetCurrentPage = 1;
   refreshAsetRuanganTable();
 };
-document.getElementById('filterRuanganAset').onchange = function() {
+document.getElementById('filterRuanganAset').onchange = function () {
   asetCurrentPage = 1;
   refreshAsetRuanganTable();
 };
-document.getElementById('filterKondisiAset').onchange = function() {
+document.getElementById('filterKondisiAset').onchange = function () {
   asetCurrentPage = 1;
   refreshAsetRuanganTable();
 };
-document.getElementById('searchAsetRuangan').oninput = function() {
+document.getElementById('searchAsetRuangan').oninput = function () {
   asetCurrentPage = 1;
   refreshAsetRuanganTable();
 };
@@ -1100,29 +1152,29 @@ function editAsetRuangan(idAset) {
   const rec = asetSheetData.find(r => r["ID Aset"] === idAset);
   if (!rec) return alert('⚠️ Data Aset tidak ditemukan.');
 
-  const namaRu      = rec["Nama Ruangan"] || '';
-  const namaBangun  = rec["Nama Bangunan"] || '';
-  const namaBarang  = rec["Nama Barang"]   || '';
+  const namaRu = rec["Nama Ruangan"] || '';
+  const namaBangun = rec["Nama Bangunan"] || '';
+  const namaBarang = rec["Nama Barang"] || '';
 
-  const ruanganArr  = getData('ruangan')   || [];
+  const ruanganArr = getData('ruangan') || [];
   const bangunanArr = getData('bangunan') || [];
-  const barangArr   = getData('barang')    || [];
+  const barangArr = getData('barang') || [];
 
   const ruObj = ruanganArr.find(r =>
     r.nama === namaRu &&
-    ((bangunanArr.find(b => b.id === r.bangunanId)?.nama || '') === namaBangun)
+    ((bangunanArr.find(b => b.id === r.bangunanId) ?.nama || '') === namaBangun)
   );
   if (!ruObj) return alert('⚠️ Gagal konversi Nama Ruangan → ID.');
 
   const bObj = barangArr.find(b => b.nama === namaBarang);
   if (!bObj) return alert('⚠️ Gagal konversi Nama Barang → ID.');
 
-  document.getElementById('ruanganAset').value    = ruObj.id;
-  document.getElementById('barangAset').value     = bObj.id;
-  document.getElementById('kebutuhanAset').value  = rec["Kebutuhan"]||0;
-  document.getElementById('jumlahAset').value     = rec["Jumlah"]||'';
-  document.getElementById('kondisiAset').value    = rec["Kondisi"]||'';
-  document.getElementById('catatanAset').value    = rec["Catatan"]||'';
+  document.getElementById('ruanganAset').value = ruObj.id;
+  document.getElementById('barangAset').value = bObj.id;
+  document.getElementById('kebutuhanAset').value = rec["Kebutuhan"] || 0;
+  document.getElementById('jumlahAset').value = rec["Jumlah"] || '';
+  document.getElementById('kondisiAset').value = rec["Kondisi"] || '';
+  document.getElementById('catatanAset').value = rec["Catatan"] || '';
 
   const formEl = document.getElementById('formAsetRuangan');
   formEl.setAttribute('data-edit-id', idAset);
@@ -1160,13 +1212,17 @@ function deleteAsetRuangan(idAset) {
   const payloadObj = {
     action: 'delete',
     table: 'Daftar Aset',
-    data: [ { 'ID Aset': idAset } ]
+    data: [{
+      'ID Aset': idAset
+    }]
   };
 
   fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers: {'Content-Type': 'application/json'},
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payloadObj)
   }).then(async () => {
     showToast('🗑️ Aset berhasil dihapus.', 'success');
@@ -1195,74 +1251,79 @@ document.querySelector('a[href="#aset"]').addEventListener('shown.bs.tab', funct
 
 let rekapCurrentPage = 1;
 
-  // Fungsi untuk mengambil data Daftar Aset dan menyimpannya ke daftarAsetData
-  async function fetchDaftarAsetFromSheet() {
-    try {
-      const resp = await fetch(DAFTAR_ASET_SHEET_URL);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const raw = await resp.json();
-      daftarAsetData = parseSheetRows(raw.values || []);
-    } catch (err) {
-      console.error('⚠️ Gagal fetch Daftar Aset:', err);
-      daftarAsetData = [];
-    }
+// Fungsi untuk mengambil data Daftar Aset dan menyimpannya ke daftarAsetData
+async function fetchDaftarAsetFromSheet() {
+  try {
+    const resp = await fetch(DAFTAR_ASET_SHEET_URL);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const raw = await resp.json();
+    daftarAsetData = parseSheetRows(raw.values || []);
+  } catch (err) {
+    console.error('⚠️ Gagal fetch Daftar Aset:', err);
+    daftarAsetData = [];
+  }
+}
+
+// ———— Fungsi Rekap Barang ————
+async function refreshTabelRekapBarang() {
+  // Pastikan data sudah terisi
+  if (daftarAsetData.length === 0) {
+    await fetchDaftarAsetFromSheet();
   }
 
-  // ———— Fungsi Rekap Barang ————
-  async function refreshTabelRekapBarang() {
-    // Pastikan data sudah terisi
-    if (daftarAsetData.length === 0) {
-      await fetchDaftarAsetFromSheet();
-    }
+  const tbody = document.querySelector('#tabelRekapBarang tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
 
-    const tbody = document.querySelector('#tabelRekapBarang tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+  // Filter input
+  const filterKategori = document.getElementById('filterKategoriRekap') ?.value || '';
+  const searchKeyword = document.getElementById('searchRekap') ?.value.toLowerCase() || '';
 
-    // Filter input
-    const filterKategori = document.getElementById('filterKategoriRekap')?.value || '';
-    const searchKeyword  = document.getElementById('searchRekap')?.value.toLowerCase() || '';
+  // Agregasi: hitung total jumlah per “Nama Barang – Kategori – Spesifikasi”
+  const mapTotal = {}; // key: `${nama}|${kategori}|${spesifikasi}`, value: total jumlah
+  daftarAsetData.forEach(row => {
+    const nama = row['Nama Barang'] ?.toString() || '';
+    const kategori = row['Kategori'] ?.toString() || '';
+    const spesifikasi = row['Spesifikasi'] ?.toString() || '';
+    const jumlah = parseInt(row['Jumlah'] || '0', 10) || 0;
 
-    // Agregasi: hitung total jumlah per “Nama Barang – Kategori – Spesifikasi”
-    const mapTotal = {}; // key: `${nama}|${kategori}|${spesifikasi}`, value: total jumlah
-    daftarAsetData.forEach(row => {
-      const nama        = row['Nama Barang']?.toString() || '';
-      const kategori    = row['Kategori']?.toString() || '';
-      const spesifikasi = row['Spesifikasi']?.toString() || '';
-      const jumlah      = parseInt(row['Jumlah'] || '0', 10) || 0;
+    if (!nama) return;
+    const key = `${nama}||${kategori}||${spesifikasi}`;
+    mapTotal[key] = (mapTotal[key] || 0) + jumlah;
+  });
 
-      if (!nama) return;
-      const key = `${nama}||${kategori}||${spesifikasi}`;
-      mapTotal[key] = (mapTotal[key] || 0) + jumlah;
-    });
+  // Bentuk array data rekap
+  let dataTampil = Object.entries(mapTotal).map(([key, total]) => {
+    const [nama, kategori, spesifikasi] = key.split('||');
+    return {
+      nama,
+      kategori,
+      spesifikasi,
+      total
+    };
+  }).filter(item => item.total > 0);
 
-    // Bentuk array data rekap
-    let dataTampil = Object.entries(mapTotal).map(([key, total]) => {
-      const [nama, kategori, spesifikasi] = key.split('||');
-      return { nama, kategori, spesifikasi, total };
-    }).filter(item => item.total > 0);
+  // Filter berdasarkan kategori dan nama barang
+  if (filterKategori) {
+    dataTampil = dataTampil.filter(item => item.kategori === filterKategori);
+  }
+  if (searchKeyword) {
+    dataTampil = dataTampil.filter(item =>
+      item.nama.toLowerCase().includes(searchKeyword)
+    );
+  }
 
-    // Filter berdasarkan kategori dan nama barang
-    if (filterKategori) {
-      dataTampil = dataTampil.filter(item => item.kategori === filterKategori);
-    }
-    if (searchKeyword) {
-      dataTampil = dataTampil.filter(item =>
-        item.nama.toLowerCase().includes(searchKeyword)
-      );
-    }
+  // Pagination
+  const showCount = parseInt(document.getElementById('rekapShowCount') ?.value || '10', 10);
+  const totalRows = dataTampil.length;
+  const maxPage = Math.ceil(totalRows / showCount) || 1;
+  if (rekapCurrentPage > maxPage) rekapCurrentPage = 1;
+  const startIdx = (rekapCurrentPage - 1) * showCount;
+  const rowsPage = dataTampil.slice(startIdx, startIdx + showCount);
 
-    // Pagination
-    const showCount = parseInt(document.getElementById('rekapShowCount')?.value || '10', 10);
-    const totalRows = dataTampil.length;
-    const maxPage   = Math.ceil(totalRows / showCount) || 1;
-    if (rekapCurrentPage > maxPage) rekapCurrentPage = 1;
-    const startIdx = (rekapCurrentPage - 1) * showCount;
-    const rowsPage = dataTampil.slice(startIdx, startIdx + showCount);
-
-    // Render setiap baris
-    rowsPage.forEach(item => {
-      tbody.insertAdjacentHTML('beforeend', `
+  // Render setiap baris
+  rowsPage.forEach(item => {
+    tbody.insertAdjacentHTML('beforeend', `
         <tr>
           <td>${item.nama}</td>
           <td>${item.kategori || '-'}</td>
@@ -1270,106 +1331,106 @@ let rekapCurrentPage = 1;
           <td>${item.total}</td>
         </tr>
       `);
-    });
-
-    // Tampilkan pagination
-    const pagingEl = document.getElementById('rekapPaging');
-    if (pagingEl) {
-      pagingEl.innerHTML = renderPaging(rekapCurrentPage, maxPage, 'setRekapPage');
-    }
-  }
-
-  window.setRekapPage = function(page) {
-    if (page < 1) page = 1;
-    rekapCurrentPage = page;
-    refreshTabelRekapBarang();
-  };
-
-  document.getElementById('rekapShowCount')?.addEventListener('change', function() {
-    rekapCurrentPage = 1;
-    refreshTabelRekapBarang();
-  });
-  document.getElementById('filterKategoriRekap')?.addEventListener('change', function() {
-    rekapCurrentPage = 1;
-    refreshTabelRekapBarang();
-  });
-  document.getElementById('searchRekap')?.addEventListener('input', function() {
-    rekapCurrentPage = 1;
-    refreshTabelRekapBarang();
   });
 
-  // ———— Filter Kategori di Dropdown ————
-  async function refreshFilterKategoriRekap() {
-    if (daftarAsetData.length === 0) {
-      await fetchDaftarAsetFromSheet();
-    }
-    const selKategori = document.getElementById('filterKategoriRekap');
-    if (!selKategori) return;
-
-    // Kumpulkan semua kategori unik dari daftarAsetData
-    const kategoriSet = new Set();
-    daftarAsetData.forEach(r => {
-      const kat = r['Kategori']?.toString() || '';
-      if (kat) kategoriSet.add(kat);
-    });
-
-    const current = selKategori.value || '';
-    selKategori.innerHTML = '<option value="">Semua Kategori</option>';
-    Array.from(kategoriSet).sort().forEach(kat => {
-      selKategori.insertAdjacentHTML('beforeend',
-        `<option value="${kat}"${current === kat ? ' selected' : ''}>${kat}</option>`
-      );
-    });
-    selKategori.value = current;
+  // Tampilkan pagination
+  const pagingEl = document.getElementById('rekapPaging');
+  if (pagingEl) {
+    pagingEl.innerHTML = renderPaging(rekapCurrentPage, maxPage, 'setRekapPage');
   }
+}
 
-  // ———— Filter Ruangan di Dropdown ————
-  async function refreshFilterLaporanRuangan() {
-    if (daftarAsetData.length === 0) {
-      await fetchDaftarAsetFromSheet();
-    }
-    const sel = document.getElementById('filterLaporanRuangan');
-    if (!sel) return;
+window.setRekapPage = function (page) {
+  if (page < 1) page = 1;
+  rekapCurrentPage = page;
+  refreshTabelRekapBarang();
+};
 
-    // Kumpulkan Nama Ruangan unik
-    const ruangSet = new Set();
-    daftarAsetData.forEach(r => {
-      const namaRu = r['Nama Ruangan']?.toString() || '';
-      if (namaRu) ruangSet.add(namaRu);
-    });
+document.getElementById('rekapShowCount') ?.addEventListener('change', function () {
+  rekapCurrentPage = 1;
+  refreshTabelRekapBarang();
+});
+document.getElementById('filterKategoriRekap') ?.addEventListener('change', function () {
+  rekapCurrentPage = 1;
+  refreshTabelRekapBarang();
+});
+document.getElementById('searchRekap') ?.addEventListener('input', function () {
+  rekapCurrentPage = 1;
+  refreshTabelRekapBarang();
+});
 
-    sel.innerHTML = '<option value="">Pilih Ruangan</option>';
-    Array.from(ruangSet).sort().forEach(namaRu => {
-      sel.insertAdjacentHTML('beforeend',
-        `<option value="${namaRu}">${namaRu}</option>`
-      );
-    });
+// ———— Filter Kategori di Dropdown ————
+async function refreshFilterKategoriRekap() {
+  if (daftarAsetData.length === 0) {
+    await fetchDaftarAsetFromSheet();
   }
+  const selKategori = document.getElementById('filterKategoriRekap');
+  if (!selKategori) return;
 
-  // ———— Tabel Barang per Ruangan ————
-  async function refreshTabelBarangPerRuangan() {
-    if (daftarAsetData.length === 0) {
-      await fetchDaftarAsetFromSheet();
-    }
-    const ruanganTerpilih = document.getElementById('filterLaporanRuangan')?.value || '';
-    const tbody = document.querySelector('#tabelBarangPerRuangan tbody');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+  // Kumpulkan semua kategori unik dari daftarAsetData
+  const kategoriSet = new Set();
+  daftarAsetData.forEach(r => {
+    const kat = r['Kategori'] ?.toString() || '';
+    if (kat) kategoriSet.add(kat);
+  });
 
-    if (!ruanganTerpilih) return;
+  const current = selKategori.value || '';
+  selKategori.innerHTML = '<option value="">Semua Kategori</option>';
+  Array.from(kategoriSet).sort().forEach(kat => {
+    selKategori.insertAdjacentHTML('beforeend',
+      `<option value="${kat}"${current === kat ? ' selected' : ''}>${kat}</option>`
+    );
+  });
+  selKategori.value = current;
+}
 
-    // Filter baris yang Nama Ruangan = ruanganTerpilih
-    const baris = daftarAsetData.filter(r => (r['Nama Ruangan'] || '') === ruanganTerpilih);
+// ———— Filter Ruangan di Dropdown ————
+async function refreshFilterLaporanRuangan() {
+  if (daftarAsetData.length === 0) {
+    await fetchDaftarAsetFromSheet();
+  }
+  const sel = document.getElementById('filterLaporanRuangan');
+  if (!sel) return;
 
-    baris.forEach(r => {
-      const namaBarang  = r['Nama Barang']?.toString() || '-';
-      const kategori    = r['Kategori']?.toString()      || '-';
-      const spesifikasi = r['Spesifikasi']?.toString()   || '-';
-      const jumlah      = r['Jumlah']?.toString()        || '0';
-      const kondisi     = r['Kondisi']?.toString()       || '';
-      const catatan     = r['Catatan']?.toString()       || '';
+  // Kumpulkan Nama Ruangan unik
+  const ruangSet = new Set();
+  daftarAsetData.forEach(r => {
+    const namaRu = r['Nama Ruangan'] ?.toString() || '';
+    if (namaRu) ruangSet.add(namaRu);
+  });
 
-      tbody.insertAdjacentHTML('beforeend', `
+  sel.innerHTML = '<option value="">Pilih Ruangan</option>';
+  Array.from(ruangSet).sort().forEach(namaRu => {
+    sel.insertAdjacentHTML('beforeend',
+      `<option value="${namaRu}">${namaRu}</option>`
+    );
+  });
+}
+
+// ———— Tabel Barang per Ruangan ————
+async function refreshTabelBarangPerRuangan() {
+  if (daftarAsetData.length === 0) {
+    await fetchDaftarAsetFromSheet();
+  }
+  const ruanganTerpilih = document.getElementById('filterLaporanRuangan') ?.value || '';
+  const tbody = document.querySelector('#tabelBarangPerRuangan tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (!ruanganTerpilih) return;
+
+  // Filter baris yang Nama Ruangan = ruanganTerpilih
+  const baris = daftarAsetData.filter(r => (r['Nama Ruangan'] || '') === ruanganTerpilih);
+
+  baris.forEach(r => {
+    const namaBarang = r['Nama Barang'] ?.toString() || '-';
+    const kategori = r['Kategori'] ?.toString() || '-';
+    const spesifikasi = r['Spesifikasi'] ?.toString() || '-';
+    const jumlah = r['Jumlah'] ?.toString() || '0';
+    const kondisi = r['Kondisi'] ?.toString() || '';
+    const catatan = r['Catatan'] ?.toString() || '';
+
+    tbody.insertAdjacentHTML('beforeend', `
         <tr>
           <td>${namaBarang}</td>
           <td>${kategori}</td>
@@ -1379,38 +1440,38 @@ let rekapCurrentPage = 1;
           <td>${catatan}</td>
         </tr>
       `);
-    });
-  }
-
-  // ———— Event ketika tab “Laporan” dibuka ————
-  document.querySelector('a[href="#laporan"]')?.addEventListener('shown.bs.tab', async function() {
-    // Pastikan data terbaru terambil
-    await fetchDaftarAsetFromSheet();
-
-    // Perbarui dropdown & tabel
-    refreshFilterKategoriRekap();
-    refreshFilterLaporanRuangan();
-
-    // Refresh tabel rekap & per-ruangan
-    rekapCurrentPage = 1;
-    refreshTabelRekapBarang();
-    refreshTabelBarangPerRuangan();
   });
+}
 
-  // ———— Event saat memilih ruangan ————
-  document.getElementById('filterLaporanRuangan')?.addEventListener('change', function() {
-    refreshTabelBarangPerRuangan();
-  });
+// ———— Event ketika tab “Laporan” dibuka ————
+document.querySelector('a[href="#laporan"]') ?.addEventListener('shown.bs.tab', async function () {
+  // Pastikan data terbaru terambil
+  await fetchDaftarAsetFromSheet();
 
-  // Kalau Anda ingin langsung memuat rekap begitu halaman siap (tanpa klik tab),
-  // bisa panggil fetchDaftarAsetFromSheet() dan refreshTabelRekapBarang() di sini:
-  document.addEventListener('DOMContentLoaded', function() {
-    // (opsional) fetchDaftarAsetFromSheet().then(() => {
-    //   refreshFilterKategoriRekap();
-    //   refreshFilterLaporanRuangan();
-    //   refreshTabelRekapBarang();
-    // });
-  });
+  // Perbarui dropdown & tabel
+  refreshFilterKategoriRekap();
+  refreshFilterLaporanRuangan();
+
+  // Refresh tabel rekap & per-ruangan
+  rekapCurrentPage = 1;
+  refreshTabelRekapBarang();
+  refreshTabelBarangPerRuangan();
+});
+
+// ———— Event saat memilih ruangan ————
+document.getElementById('filterLaporanRuangan') ?.addEventListener('change', function () {
+  refreshTabelBarangPerRuangan();
+});
+
+// Kalau Anda ingin langsung memuat rekap begitu halaman siap (tanpa klik tab),
+// bisa panggil fetchDaftarAsetFromSheet() dan refreshTabelRekapBarang() di sini:
+document.addEventListener('DOMContentLoaded', function () {
+  // (opsional) fetchDaftarAsetFromSheet().then(() => {
+  //   refreshFilterKategoriRekap();
+  //   refreshFilterLaporanRuangan();
+  //   refreshTabelRekapBarang();
+  // });
+});
 
 // -------------------------------------------
 // 2) Fetch Daftar Aset & History Peminjaman
@@ -1456,11 +1517,15 @@ document.getElementById('btnExportExcel').onclick = function () {
 
 // EXPORT PDF
 document.getElementById('btnExportPDF').onclick = function () {
-  const { jsPDF } = window.jspdf;
+  const {
+    jsPDF
+  } = window.jspdf;
   const doc = new jsPDF();
   doc.text("Rekap Aset Seriang Training Center", 14, 12);
   doc.autoTable({
-    head: [ ['Nama Barang','Kategori','Spesifikasi','Total Jumlah'] ],
+    head: [
+      ['Nama Barang', 'Kategori', 'Spesifikasi', 'Total Jumlah']
+    ],
     body: Array.from(document.querySelectorAll('#tabelRekapBarang tbody tr')).map(row =>
       Array.from(row.children).map(td => td.textContent)
     ),
@@ -1470,6 +1535,7 @@ document.getElementById('btnExportPDF').onclick = function () {
 };
 
 let chartAset;
+
 function renderChartAset() {
   const barang = getData('barang');
   const asetRuangan = getData('asetruangan');
@@ -1520,16 +1586,23 @@ document.getElementById('fileImportExcel').onchange = function (evt) {
   const reader = new FileReader();
   reader.onload = function (e) {
     const data = new Uint8Array(e.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
+    const workbook = XLSX.read(data, {
+      type: 'array'
+    });
 
     // Import Bangunan
     const bangunanSheet = workbook.Sheets['Bangunan'];
     let bangunan = [];
     if (bangunanSheet) {
-      const bangunanJson = XLSX.utils.sheet_to_json(bangunanSheet, { header: 1 });
+      const bangunanJson = XLSX.utils.sheet_to_json(bangunanSheet, {
+        header: 1
+      });
       bangunan = bangunanJson.slice(1)
         .filter(row => row[0])
-        .map(row => ({ id: uuid(), nama: row[0] }));
+        .map(row => ({
+          id: uuid(),
+          nama: row[0]
+        }));
       setData('bangunan', bangunan);
     }
 
@@ -1537,7 +1610,9 @@ document.getElementById('fileImportExcel').onchange = function (evt) {
     const ruanganSheet = workbook.Sheets['Ruangan'];
     let ruangan = [];
     if (ruanganSheet) {
-      const ruanganJson = XLSX.utils.sheet_to_json(ruanganSheet, { header: 1 });
+      const ruanganJson = XLSX.utils.sheet_to_json(ruanganSheet, {
+        header: 1
+      });
       ruangan = ruanganJson.slice(1)
         .filter(row => row[0] && row[1])
         .map(row => {
@@ -1555,7 +1630,9 @@ document.getElementById('fileImportExcel').onchange = function (evt) {
     const barangSheet = workbook.Sheets['Barang'];
     let barang = [];
     if (barangSheet) {
-      const barangJson = XLSX.utils.sheet_to_json(barangSheet, { header: 1 });
+      const barangJson = XLSX.utils.sheet_to_json(barangSheet, {
+        header: 1
+      });
       barang = barangJson.slice(1)
         .filter(row => row[0])
         .map(row => ({
@@ -1571,7 +1648,9 @@ document.getElementById('fileImportExcel').onchange = function (evt) {
     const asetSheet = workbook.Sheets['Aset'];
     let asetruangan = [];
     if (asetSheet) {
-      const asetJson = XLSX.utils.sheet_to_json(asetSheet, { header: 1 });
+      const asetJson = XLSX.utils.sheet_to_json(asetSheet, {
+        header: 1
+      });
       asetruangan = asetJson.slice(1)
         .filter(row => row[0] && row[1] && row[2])
         .map(row => {
@@ -1647,7 +1726,9 @@ async function renderDashboard() {
       </div>
     `;
     document.querySelector('.dashboard-card-sntz').onclick = function () {
-      dashboardStack.push({ level: dashboardLevel });
+      dashboardStack.push({
+        level: dashboardLevel
+      });
       dashboardLevel = 'building';
       renderDashboard();
     };
@@ -1681,7 +1762,10 @@ async function renderDashboard() {
     };
     document.querySelectorAll('.dashboard-card-building').forEach(el => {
       el.onclick = function () {
-        dashboardStack.push({ level: dashboardLevel, building: el.dataset.building });
+        dashboardStack.push({
+          level: dashboardLevel,
+          building: el.dataset.building
+        });
         dashboardLevel = 'room';
         dashboardLevelBuilding = el.dataset.building;
         renderDashboard();
@@ -1719,7 +1803,11 @@ async function renderDashboard() {
     };
     document.querySelectorAll('.dashboard-card-room').forEach(el => {
       el.onclick = function () {
-        dashboardStack.push({ level: dashboardLevel, building, room: el.dataset.room });
+        dashboardStack.push({
+          level: dashboardLevel,
+          building,
+          room: el.dataset.room
+        });
         dashboardLevel = 'aset';
         renderDashboard();
       }
@@ -1814,7 +1902,7 @@ document.getElementById('btnLaporanSelisih').onclick = async function () {
       ["Nama Barang", "Kategori", "Spesifikasi", "Ruangan", "Bangunan", "Kebutuhan", "Aktual", "Selisih", "Kondisi", "Catatan"],
       ...dataSelisih.map(r => [
         r["Nama Barang"], r["Kategori"], r["Spesifikasi"], r["Nama Ruangan"], r["Nama Bangunan"],
-        r["Kebutuhan"]||0, r["Jumlah"]||0, (parseInt(r["Jumlah"]||0)-(parseInt(r["Kebutuhan"])||0)), r["Kondisi"], r["Catatan"]||''
+        r["Kebutuhan"] || 0, r["Jumlah"] || 0, (parseInt(r["Jumlah"] || 0) - (parseInt(r["Kebutuhan"]) || 0)), r["Kondisi"], r["Catatan"] || ''
       ])
     ];
     const wb = XLSX.utils.book_new();
@@ -1834,11 +1922,11 @@ async function fetchUsersFromSheet() {
     let users = parseSheetRows(rawUsers.values || []);
     users = users.map(u => ({
       ...u,
-      kategoriAkses: Array.isArray(u.kategoriAkses)
-        ? u.kategoriAkses
-        : (typeof u.kategoriAkses === 'string'
-            ? u.kategoriAkses.split(',').map(s => s.trim()).filter(Boolean)
-            : [])
+      kategoriAkses: Array.isArray(u.kategoriAkses) ?
+        u.kategoriAkses :
+        (typeof u.kategoriAkses === 'string' ?
+          u.kategoriAkses.split(',').map(s => s.trim()).filter(Boolean) :
+          [])
     }));
     setUsers(users);
     return users;
@@ -1856,11 +1944,11 @@ document.getElementById('formLogin').onsubmit = async function (e) {
   let users = await fetchUsersFromSheet();
   users = users.map(u => ({
     ...u,
-    kategoriAkses: Array.isArray(u.kategoriAkses)
-      ? u.kategoriAkses
-      : (typeof u.kategoriAkses === 'string'
-          ? u.kategoriAkses.split(',').map(s => s.trim()).filter(Boolean)
-          : [])
+    kategoriAkses: Array.isArray(u.kategoriAkses) ?
+      u.kategoriAkses :
+      (typeof u.kategoriAkses === 'string' ?
+        u.kategoriAkses.split(',').map(s => s.trim()).filter(Boolean) :
+        [])
   }));
 
   const user = users.find(u => u.username === username && u.password === password);
@@ -1895,15 +1983,15 @@ function handleLoginSuccess(user) {
 // --- BATAS: PENGAMAN AKSES ---
 function cekAksesUI() {
   const tabDashboard = document.getElementById('nav-dashboard');
-  const tabMaster    = document.getElementById('nav-masterdata');
-  const tabAset      = document.getElementById('nav-aset');
-  const tabLaporan   = document.getElementById('nav-laporan');
-  const tabSync      = document.getElementById('nav-sync');
-  const tabPinjam    = document.getElementById('nav-peminjaman');
-  const sectionUser  = document.getElementById('userSection');
-  const panelMaster  = document.getElementById('masterdata');
-  const panelAset    = document.getElementById('aset');
-  const panelPinjam  = document.getElementById('peminjaman');
+  const tabMaster = document.getElementById('nav-masterdata');
+  const tabAset = document.getElementById('nav-aset');
+  const tabLaporan = document.getElementById('nav-laporan');
+  const tabSync = document.getElementById('nav-sync');
+  const tabPinjam = document.getElementById('nav-peminjaman');
+  const sectionUser = document.getElementById('userSection');
+  const panelMaster = document.getElementById('masterdata');
+  const panelAset = document.getElementById('aset');
+  const panelPinjam = document.getElementById('peminjaman');
 
   [tabDashboard, tabMaster, tabAset, tabLaporan, tabSync, tabPinjam].forEach(el => {
     if (el) el.style.display = 'none';
@@ -1917,17 +2005,17 @@ function cekAksesUI() {
 
   if (CURRENT_USER.role === 'admin') {
     if (tabDashboard) tabDashboard.style.display = '';
-    if (tabMaster)    tabMaster.style.display = '';
-    if (tabAset)      tabAset.style.display = '';
-    if (tabLaporan)   tabLaporan.style.display = '';
-    if (tabSync)      tabSync.style.display = '';
-    if (panelMaster)  panelMaster.style.display = '';
-    if (panelAset)    panelAset.style.display = '';
-    if (sectionUser)  sectionUser.style.display = '';
+    if (tabMaster) tabMaster.style.display = '';
+    if (tabAset) tabAset.style.display = '';
+    if (tabLaporan) tabLaporan.style.display = '';
+    if (tabSync) tabSync.style.display = '';
+    if (panelMaster) panelMaster.style.display = '';
+    if (panelAset) panelAset.style.display = '';
+    if (sectionUser) sectionUser.style.display = '';
   }
 
   if (CURRENT_USER.role === 'peminjam') {
-    if (tabPinjam)   tabPinjam.style.display = '';
+    if (tabPinjam) tabPinjam.style.display = '';
     if (panelPinjam) panelPinjam.style.display = '';
   }
 
@@ -1946,7 +2034,7 @@ function showToast(msg, type = 'info', timeout = 3000) {
     'danger': 'bg-danger text-white',
     'info': 'bg-info text-white',
     'warning': 'bg-warning text-dark'
-  }[type] || 'bg-secondary text-white';
+  } [type] || 'bg-secondary text-white';
   const toast = document.createElement('div');
   toast.className = `toast align-items-center show mb-2 ${bg}`;
   toast.id = id;
@@ -1998,14 +2086,14 @@ async function fetchStokAwal() {
   return data;
 }
 
-document.querySelector('a[href="#masterdata"]').addEventListener('shown.bs.tab', async function() {
+document.querySelector('a[href="#masterdata"]').addEventListener('shown.bs.tab', async function () {
   await refreshTabelMasterStok();
 });
 
 function cekAkses() {
   if (!CURRENT_USER) return;
   document.getElementById('masterdata').style.display = CURRENT_USER.role === 'admin' ? '' : 'none';
-  document.getElementById('aset').style.display       = CURRENT_USER.role === 'admin' ? '' : 'none';
+  document.getElementById('aset').style.display = CURRENT_USER.role === 'admin' ? '' : 'none';
 }
 
 
@@ -2021,8 +2109,8 @@ function filterUserData(users, keyword) {
 function refreshUserTable() {
   const users = getUsers();
   const tbody = document.querySelector('#tabelUser tbody');
-  const searchKeyword = (document.getElementById('searchUser')?.value || '').toLowerCase();
-  const showCount = parseInt(document.getElementById('userShowCount')?.value || 10);
+  const searchKeyword = (document.getElementById('searchUser') ?.value || '').toLowerCase();
+  const showCount = parseInt(document.getElementById('userShowCount') ?.value || 10);
 
   let dataTampil = filterUserData(users, searchKeyword);
   const totalRows = dataTampil.length;
@@ -2033,9 +2121,9 @@ function refreshUserTable() {
 
   tbody.innerHTML = '';
   rowsPage.forEach((u) => {
-    const kategoriAksesText = Array.isArray(u.kategoriAkses)
-      ? u.kategoriAkses.join(', ')
-      : (u.kategoriAkses || '');
+    const kategoriAksesText = Array.isArray(u.kategoriAkses) ?
+      u.kategoriAkses.join(', ') :
+      (u.kategoriAkses || '');
     tbody.innerHTML += `
       <tr>
         <td>${u.username}</td>
@@ -2053,7 +2141,7 @@ function refreshUserTable() {
     renderPaging(userCurrentPage, maxPage, 'setUserPage');
 }
 
-window.setUserPage = function(page) {
+window.setUserPage = function (page) {
   userCurrentPage = page;
   refreshUserTable();
 }
@@ -2073,7 +2161,7 @@ function editUser(username) {
   if (!u) return;
   document.getElementById('userUsername').value = u.username;
   document.getElementById('userPassword').value = u.password;
-  document.getElementById('userRole').value     = u.role;
+  document.getElementById('userRole').value = u.role;
   const selectKat = document.getElementById('userKategori');
   Array.from(selectKat.options).forEach(opt => {
     opt.selected = u.kategoriAkses && u.kategoriAkses.includes(opt.value);
@@ -2095,12 +2183,16 @@ function deleteUser(username) {
   const payloadAunthDel = {
     action: 'delete',
     table: 'Aunth',
-    data: [ { 'username': username } ]
+    data: [{
+      'username': username
+    }]
   };
   fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers: { 'Content-Type': 'application/json' },
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(payloadAunthDel)
   });
 
@@ -2114,9 +2206,9 @@ document.getElementById('formUser').onsubmit = async function (e) {
   e.preventDefault();
   const username = document.getElementById('userUsername').value.trim();
   const password = document.getElementById('userPassword').value.trim();
-  const role     = document.getElementById('userRole').value;
+  const role = document.getElementById('userRole').value;
   const kategoriSelect = document.getElementById('userKategori');
-  const kategoriAkses  = Array.from(kategoriSelect.selectedOptions).map(opt => opt.value);
+  const kategoriAkses = Array.from(kategoriSelect.selectedOptions).map(opt => opt.value);
 
   const formEl = document.getElementById('formUser');
   const editUsername = formEl.getAttribute('data-edit-username');
@@ -2125,8 +2217,8 @@ document.getElementById('formUser').onsubmit = async function (e) {
   if (editUsername) {
     const idx = users.findIndex(x => x.username === editUsername);
     if (idx > -1) {
-      users[idx].password      = password;
-      users[idx].role          = role;
+      users[idx].password = password;
+      users[idx].role = role;
       users[idx].kategoriAkses = kategoriAkses;
       setUsers(users);
     }
@@ -2135,20 +2227,20 @@ document.getElementById('formUser').onsubmit = async function (e) {
     const payloadAunth = {
       action: 'update',
       table: 'Aunth',
-      data: [
-        {
-          'username': editUsername,
-          'password': password,
-          'role':     role,
-          'kategoriAkses': kategoriAkses.join(','),
-          'Timestamp': now
-        }
-      ]
+      data: [{
+        'username': editUsername,
+        'password': password,
+        'role': role,
+        'kategoriAkses': kategoriAkses.join(','),
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadAunth)
     });
 
@@ -2178,20 +2270,20 @@ document.getElementById('formUser').onsubmit = async function (e) {
     const payloadAunth = {
       action: 'append',
       table: 'Aunth',
-      data: [
-        {
-          'username': username,
-          'password': password,
-          'role':     role,
-          'kategoriAkses': kategoriAkses.join(','),
-          'Timestamp': now
-        }
-      ]
+      data: [{
+        'username': username,
+        'password': password,
+        'role': role,
+        'kategoriAkses': kategoriAkses.join(','),
+        'Timestamp': now
+      }]
     };
     fetch(GAS_URL, {
       method: 'POST',
-      mode:   'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(payloadAunth)
     });
 
@@ -2245,12 +2337,15 @@ function setCurrentUser(user) {
   if (user) localStorage.setItem('current_user', JSON.stringify(user));
   else localStorage.removeItem('current_user');
 }
+
 function getCurrentUser() {
   return JSON.parse(localStorage.getItem('current_user') || 'null');
 }
+
 function setUsers(users) {
   localStorage.setItem('users', JSON.stringify(users));
 }
+
 function getUsers() {
   return JSON.parse(localStorage.getItem('users') || '[]');
 }
@@ -2270,7 +2365,7 @@ document.getElementById('btnSyncUsers').onclick = async function () {
   const payloadArray = usersToAppend.map(u => ({
     'username': u.username,
     'password': u.password,
-    'role':     u.role,
+    'role': u.role,
     'kategoriAkses': (u.kategoriAkses || []).join(','),
     'Timestamp': now
   }));
@@ -2342,9 +2437,12 @@ async function refreshBarangPinjamSelect() {
   const mapOutstanding = {};
   historyPinjamanData.forEach(h => {
     const nama = (h["Nama Barang"] || '').toString();
-    const jml  = parseInt(h["Jumlah"]) || 0;
+    const jml = parseInt(h["Jumlah"]) || 0;
     if (!mapOutstanding[nama]) {
-      mapOutstanding[nama] = { approved: 0, returned: 0 };
+      mapOutstanding[nama] = {
+        approved: 0,
+        returned: 0
+      };
     }
     if (h["Status"] === "Approved") {
       mapOutstanding[nama].approved += jml;
@@ -2357,13 +2455,16 @@ async function refreshBarangPinjamSelect() {
   const allowedKategori = CURRENT_USER.kategoriAkses || [];
 
   masterList.forEach(item => {
-    const namaBarang   = (item["Nama Barang"] || '').toString();
-    const kategoriItem = (item["Kategori"]   || '').toString();
+    const namaBarang = (item["Nama Barang"] || '').toString();
+    const kategoriItem = (item["Kategori"] || '').toString();
     const masterJumlah = parseInt(item["Total Stok"] || '0', 10);
 
-    const info = mapOutstanding[namaBarang] || { approved: 0, returned: 0 };
+    const info = mapOutstanding[namaBarang] || {
+      approved: 0,
+      returned: 0
+    };
     const outstanding = info.approved - info.returned;
-    const available   = masterJumlah - outstanding;
+    const available = masterJumlah - outstanding;
 
     if (available <= 0) return;
     if (!allowedKategori.includes(kategoriItem)) return;
@@ -2384,7 +2485,7 @@ async function refreshBarangPinjamSelect() {
 document.getElementById('formPinjam').onsubmit = async function (e) {
   e.preventDefault();
   const barangNama = document.getElementById('pinjamBarang').value;
-  const jumlah     = parseInt(document.getElementById('pinjamJumlah').value);
+  const jumlah = parseInt(document.getElementById('pinjamJumlah').value);
   if (!barangNama || !jumlah) return;
 
   await fetchHistoryFromSheet();
@@ -2404,7 +2505,7 @@ document.getElementById('formPinjam').onsubmit = async function (e) {
     .reduce((s, h) => s + (parseInt(h["Jumlah"]) || 0), 0);
 
   const outstanding = approvedTotal - returnedTotal;
-  const available   = masterJumlah - outstanding;
+  const available = masterJumlah - outstanding;
 
   if (available < jumlah) {
     return showToast(`Stok tidak cukup: tersedia cuma ${available}`, "danger");
@@ -2414,26 +2515,26 @@ document.getElementById('formPinjam').onsubmit = async function (e) {
   const nowISO = new Date().toISOString();
   const payload = {
     action: 'append',
-    table:  'History Peminjaman',
-    data: [
-      {
-        'Tanggal':         nowLok,
-        'Username':        CURRENT_USER.username,
-        'Nama Barang':     barangNama,
-        'Kategori':        masterItem["Kategori"] || '',
-        'Jumlah':          jumlah,
-        'Status':          'Pending',
-        'Keterangan':      '',
-        'Timestamp Server': nowISO
-      }
-    ]
+    table: 'History Peminjaman',
+    data: [{
+      'Tanggal': nowLok,
+      'Username': CURRENT_USER.username,
+      'Nama Barang': barangNama,
+      'Kategori': masterItem["Kategori"] || '',
+      'Jumlah': jumlah,
+      'Status': 'Pending',
+      'Keterangan': '',
+      'Timestamp Server': nowISO
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payload)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   });
 
   showToast('✅ Permintaan peminjaman dikirim. Menunggu approval admin.', 'info');
@@ -2573,7 +2674,7 @@ async function renderApprovalTable() {
   document.getElementById('approvalTable').innerHTML = html;
 }
 
-window.approvePinjaman = async function(timestampServer) {
+window.approvePinjaman = async function (timestampServer) {
   await fetchHistoryFromSheet();
   const target = historyPinjamanData.find(h =>
     h["Timestamp Server"] === timestampServer && h["Status"] === "Pending"
@@ -2586,26 +2687,26 @@ window.approvePinjaman = async function(timestampServer) {
   const nowISO = new Date().toISOString();
   const payload = {
     action: 'append',
-    table:  'History Peminjaman',
-    data: [
-      {
-        'Tanggal':          nowLok,
-        'Username':         target["Username"],
-        'Nama Barang':      target["Nama Barang"],
-        'Kategori':         target["Kategori"] || '',
-        'Jumlah':           target["Jumlah"],
-        'Status':           'Approved',
-        'Keterangan':       '',
-        'Timestamp Server': nowISO
-      }
-    ]
+    table: 'History Peminjaman',
+    data: [{
+      'Tanggal': nowLok,
+      'Username': target["Username"],
+      'Nama Barang': target["Nama Barang"],
+      'Kategori': target["Kategori"] || '',
+      'Jumlah': target["Jumlah"],
+      'Status': 'Approved',
+      'Keterangan': '',
+      'Timestamp Server': nowISO
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payload)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   });
 
   showToast('✅ Peminjaman disetujui.', 'success');
@@ -2614,7 +2715,7 @@ window.approvePinjaman = async function(timestampServer) {
   await renderApprovalTable();
 };
 
-window.rejectPinjaman = async function(timestampServer) {
+window.rejectPinjaman = async function (timestampServer) {
   await fetchHistoryFromSheet();
   const target = historyPinjamanData.find(h =>
     h["Timestamp Server"] === timestampServer && h["Status"] === "Pending"
@@ -2627,26 +2728,26 @@ window.rejectPinjaman = async function(timestampServer) {
   const nowISO = new Date().toISOString();
   const payload = {
     action: 'append',
-    table:  'History Peminjaman',
-    data: [
-      {
-        'Tanggal':          nowLok,
-        'Username':         target["Username"],
-        'Nama Barang':      target["Nama Barang"],
-        'Kategori':         target["Kategori"] || '',
-        'Jumlah':           target["Jumlah"],
-        'Status':           'Rejected',
-        'Keterangan':       '',
-        'Timestamp Server': nowISO
-      }
-    ]
+    table: 'History Peminjaman',
+    data: [{
+      'Tanggal': nowLok,
+      'Username': target["Username"],
+      'Nama Barang': target["Nama Barang"],
+      'Kategori': target["Kategori"] || '',
+      'Jumlah': target["Jumlah"],
+      'Status': 'Rejected',
+      'Keterangan': '',
+      'Timestamp Server': nowISO
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payload)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   });
 
   showToast('🚫 Peminjaman ditolak.', 'warning');
@@ -2680,7 +2781,7 @@ async function refreshRiwayatPinjam() {
   }
 
   // 4) Filter: Pending yang belum ada Approved/Rejected lebih baru
-  const pending = userHistory.filter(h => 
+  const pending = userHistory.filter(h =>
     h["Status"] === "Pending" &&
     !hasLaterStatus(userHistory, h, ["Approved", "Rejected"])
   );
@@ -2753,7 +2854,7 @@ async function refreshRiwayatPinjam() {
 // (G) Fungsi "Kembalikan" Peminjaman (User)
 // -------------------------------------------
 
-window.kembalikanPinjaman = async function(timestampServer) {
+window.kembalikanPinjaman = async function (timestampServer) {
   await fetchHistoryFromSheet();
 
   const target = historyPinjamanData.find(h =>
@@ -2769,26 +2870,26 @@ window.kembalikanPinjaman = async function(timestampServer) {
   const nowISO = new Date().toISOString();
   const payload = {
     action: 'append',
-    table:  'History Peminjaman',
-    data: [
-      {
-        'Tanggal':          nowLok,
-        'Username':         target["Username"],
-        'Nama Barang':      target["Nama Barang"],
-        'Kategori':         target["Kategori"] || '',
-        'Jumlah':           target["Jumlah"],
-        'Status':           'ReturnPending',
-        'Keterangan':       '',
-        'Timestamp Server': nowISO
-      }
-    ]
+    table: 'History Peminjaman',
+    data: [{
+      'Tanggal': nowLok,
+      'Username': target["Username"],
+      'Nama Barang': target["Nama Barang"],
+      'Kategori': target["Kategori"] || '',
+      'Jumlah': target["Jumlah"],
+      'Status': 'ReturnPending',
+      'Keterangan': '',
+      'Timestamp Server': nowISO
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payload)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   });
 
   showToast('🔄 Permintaan pengembalian dikirim. Menunggu konfirmasi admin.', 'info');
@@ -2815,7 +2916,7 @@ document.querySelector('a[href="#peminjaman"]').addEventListener('shown.bs.tab',
 });
 
 
-window.prosesPengembalian = async function(timestampServer) {
+window.prosesPengembalian = async function (timestampServer) {
   await fetchHistoryFromSheet();
 
   const target = historyPinjamanData.find(h =>
@@ -2848,26 +2949,26 @@ window.prosesPengembalian = async function(timestampServer) {
   const nowISO = new Date().toISOString();
   const payload = {
     action: 'append',
-    table:  'History Peminjaman',
-    data: [
-      {
-        'Tanggal':          nowLok,
-        'Username':         target["Username"],
-        'Nama Barang':      target["Nama Barang"],
-        'Kategori':         target["Kategori"] || '',
-        'Jumlah':           returnedQty,
-        'Status':           statusNew,
-        'Keterangan':       note,
-        'Timestamp Server': nowISO
-      }
-    ]
+    table: 'History Peminjaman',
+    data: [{
+      'Tanggal': nowLok,
+      'Username': target["Username"],
+      'Nama Barang': target["Nama Barang"],
+      'Kategori': target["Kategori"] || '',
+      'Jumlah': returnedQty,
+      'Status': statusNew,
+      'Keterangan': note,
+      'Timestamp Server': nowISO
+    }]
   };
 
   await fetch(GAS_URL, {
     method: 'POST',
-    mode:   'no-cors',
-    headers:{ 'Content-Type': 'application/json' },
-    body:   JSON.stringify(payload)
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
   });
 
   showToast(`🔁 Pengembalian diproses (${statusNew}).`, 'success');
@@ -2930,8 +3031,8 @@ function filterAuditLogData(logs, keyword) {
 function refreshAuditLogTable() {
   const logs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
   const tbody = document.querySelector('#tabelAuditLog tbody');
-  const searchKeyword = document.getElementById('searchAuditLog')?.value.toLowerCase() || '';
-  const showCount = parseInt(document.getElementById('auditLogShowCount')?.value || 10);
+  const searchKeyword = document.getElementById('searchAuditLog') ?.value.toLowerCase() || '';
+  const showCount = parseInt(document.getElementById('auditLogShowCount') ?.value || 10);
 
   let dataTampil = filterAuditLogData(logs, searchKeyword);
 
@@ -2970,7 +3071,7 @@ document.getElementById('btnSyncAuditLog').onclick = function () {
   });
 };
 
-window.setAuditLogPage = function(page) {
+window.setAuditLogPage = function (page) {
   auditLogCurrentPage = page;
   refreshAuditLogTable();
 }
@@ -3028,25 +3129,27 @@ document.querySelector('a[href="#laporan"]').addEventListener('shown.bs.tab', fu
 function sendTelegramNotif(msg) {
   const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
   fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: msg,
-      parse_mode: "HTML"
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: msg,
+        parse_mode: "HTML"
+      })
     })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (!data.ok) {
-      alert('Telegram error: ' + data.description);
-      console.error('Telegram error:', data);
-    }
-  })
-  .catch(err => {
-    alert('Fetch Telegram error: ' + err);
-    console.error('Fetch Telegram error:', err);
-  });
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) {
+        alert('Telegram error: ' + data.description);
+        console.error('Telegram error:', data);
+      }
+    })
+    .catch(err => {
+      alert('Fetch Telegram error: ' + err);
+      console.error('Fetch Telegram error:', err);
+    });
 }
 
 // Polling history hingga status sesuai, max 5x (total ~2 detik)
@@ -3062,7 +3165,7 @@ async function getHistoryWithStatus(key, value, status) {
 
 // 4) Setelah pengguna mengajukan pinjam → notif Telegram
 const originalFormPinjamSubmit = document.getElementById('formPinjam').onsubmit;
-document.getElementById('formPinjam').onsubmit = async function(e) {
+document.getElementById('formPinjam').onsubmit = async function (e) {
   await originalFormPinjamSubmit.call(this, e);
   // Ambil nilai form
   const barangNama = document.getElementById('pinjamBarang').value;
@@ -3073,16 +3176,16 @@ document.getElementById('formPinjam').onsubmit = async function(e) {
     return;
   }
   const msg = `📩 <b>New Loan Request</b>\n` +
-              `User: <i>${CURRENT_USER.username}</i>\n` +
-              `Barang: <i>${barangNama}</i>\n` +
-              `Jumlah: <b>${jumlah}</b>`;
+    `User: <i>${CURRENT_USER.username}</i>\n` +
+    `Barang: <i>${barangNama}</i>\n` +
+    `Jumlah: <b>${jumlah}</b>`;
   sendTelegramNotif(msg);
 };
 
 // Fungsi polling untuk menunggu data update, max 5x (2 detik total)
 async function getTargetWithWait(key, value, status) {
   let target = null;
-  for (let i=0; i<5; i++) {
+  for (let i = 0; i < 5; i++) {
     target = historyPinjamanData.find(h => h[key] === value && h["Status"] === status);
     if (target) return target;
     await wait(400);
@@ -3092,7 +3195,7 @@ async function getTargetWithWait(key, value, status) {
 
 // 5) Setelah admin menyetujui pinjam → notif Telegram
 const originalApprovePinjaman = window.approvePinjaman;
-window.approvePinjaman = async function(timestampServer) {
+window.approvePinjaman = async function (timestampServer) {
   await originalApprovePinjaman.call(this, timestampServer);
   // Polling data
   const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "Approved");
@@ -3101,15 +3204,15 @@ window.approvePinjaman = async function(timestampServer) {
     return;
   }
   const msg = `✅ <b>Loan Approved</b>\n` +
-              `User: <i>${target["Username"]}</i>\n` +
-              `Barang: <i>${target["Nama Barang"]}</i>\n` +
-              `Jumlah: <b>${target["Jumlah"]}</b>`;
+    `User: <i>${target["Username"]}</i>\n` +
+    `Barang: <i>${target["Nama Barang"]}</i>\n` +
+    `Jumlah: <b>${target["Jumlah"]}</b>`;
   sendTelegramNotif(msg);
 };
 
 // 6) Setelah admin menolak pinjam → notif Telegram
 const originalRejectPinjaman = window.rejectPinjaman;
-window.rejectPinjaman = async function(timestampServer) {
+window.rejectPinjaman = async function (timestampServer) {
   await originalRejectPinjaman.call(this, timestampServer);
   // Polling data
   const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "Rejected");
@@ -3118,15 +3221,15 @@ window.rejectPinjaman = async function(timestampServer) {
     return;
   }
   const msg = `❌ <b>Loan Rejected</b>\n` +
-              `User: <i>${target["Username"]}</i>\n` +
-              `Barang: <i>${target["Nama Barang"]}</i>\n` +
-              `Jumlah: <b>${target["Jumlah"]}</b>`;
+    `User: <i>${target["Username"]}</i>\n` +
+    `Barang: <i>${target["Nama Barang"]}</i>\n` +
+    `Jumlah: <b>${target["Jumlah"]}</b>`;
   sendTelegramNotif(msg);
 };
 
 // 7) Setelah user mengajukan pengembalian → notif Telegram
 const originalKembalikanPinjaman = window.kembalikanPinjaman;
-window.kembalikanPinjaman = async function(timestampServer) {
+window.kembalikanPinjaman = async function (timestampServer) {
   await originalKembalikanPinjaman.call(this, timestampServer);
   // Polling data
   const target = await getHistoryWithStatus("Timestamp Server", timestampServer, "ReturnPending");
@@ -3135,15 +3238,15 @@ window.kembalikanPinjaman = async function(timestampServer) {
     return;
   }
   const msg = `🔄 <b>Return Requested</b>\n` +
-              `User: <i>${target["Username"]}</i>\n` +
-              `Barang: <i>${target["Nama Barang"]}</i>\n` +
-              `Jumlah: <b>${target["Jumlah"]}</b>`;
+    `User: <i>${target["Username"]}</i>\n` +
+    `Barang: <i>${target["Nama Barang"]}</i>\n` +
+    `Jumlah: <b>${target["Jumlah"]}</b>`;
   sendTelegramNotif(msg);
 };
 
 // 8) Setelah admin memproses pengembalian (Returned atau Pending) → notif Telegram
 const originalProsesPengembalian = window.prosesPengembalian;
-window.prosesPengembalian = async function(timestampServer) {
+window.prosesPengembalian = async function (timestampServer) {
   await originalProsesPengembalian.call(this, timestampServer);
   // Cari record terbaru yang di-append (ini pola sudah benar & stabil)
   const entries = historyPinjamanData.filter(h =>
@@ -3157,17 +3260,17 @@ window.prosesPengembalian = async function(timestampServer) {
   const last = entries[entries.length - 1];
   if (last["Status"] === "Returned") {
     const msg = `📦 <b>Return Processed</b>\n` +
-                `User: <i>${last["Username"]}</i>\n` +
-                `Barang: <i>${last["Nama Barang"]}</i>\n` +
-                `Jumlah: <b>${last["Jumlah"]}</b>\n` +
-                `Status: <b>Returned</b>`;
+      `User: <i>${last["Username"]}</i>\n` +
+      `Barang: <i>${last["Nama Barang"]}</i>\n` +
+      `Jumlah: <b>${last["Jumlah"]}</b>\n` +
+      `Status: <b>Returned</b>`;
     sendTelegramNotif(msg);
   } else {
     const msg = `🕒 <b>Return Partially Processed</b>\n` +
-                `User: <i>${last["Username"]}</i>\n` +
-                `Barang: <i>${last["Nama Barang"]}</i>\n` +
-                `Jumlah Dikembalikan: <b>${last["Jumlah"]}</b>\n` +
-                `Status: <b>Pending Return</b>`;
+      `User: <i>${last["Username"]}</i>\n` +
+      `Barang: <i>${last["Nama Barang"]}</i>\n` +
+      `Jumlah Dikembalikan: <b>${last["Jumlah"]}</b>\n` +
+      `Status: <b>Pending Return</b>`;
     sendTelegramNotif(msg);
   }
 };
@@ -3178,24 +3281,28 @@ function backupAllData() {
   const keys = ['bangunan', 'ruangan', 'barang', 'asetruangan', 'users', 'pinjamans', 'audit_logs'];
   const backup = {};
   keys.forEach(k => backup[k] = getData(k));
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: 'application/json'
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'backup_inventaris_sntz_' + new Date().toISOString().replace(/[:.]/g,'-') + '.json';
+  a.download = 'backup_inventaris_sntz_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   document.getElementById('backupRestoreInfo').innerHTML = '<span class="text-success">Backup data berhasil diunduh!</span>';
-  setTimeout(() => { document.getElementById('backupRestoreInfo').innerHTML = ''; }, 5000);
+  setTimeout(() => {
+    document.getElementById('backupRestoreInfo').innerHTML = '';
+  }, 5000);
 }
 
 function handleRestoreFile(event) {
   const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     try {
       const data = JSON.parse(e.target.result);
       const keys = ['bangunan', 'ruangan', 'barang', 'asetruangan', 'users', 'pinjamans', 'audit_logs'];
@@ -3203,7 +3310,9 @@ function handleRestoreFile(event) {
         if (data[k]) setData(k, data[k]);
       });
       document.getElementById('backupRestoreInfo').innerHTML = '<span class="text-success">Restore data berhasil! Silakan refresh halaman.</span>';
-      setTimeout(() => { location.reload(); }, 1500);
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
     } catch (err) {
       document.getElementById('backupRestoreInfo').innerHTML = '<span class="text-danger">Restore gagal: file tidak valid.</span>';
     }
@@ -3218,19 +3327,21 @@ function resetAllAppData() {
     return;
   }
   if (!confirm('Yakin ingin menghapus SEMUA DATA aplikasi (master data, user, aset, pinjaman, log)? Proses tidak bisa dibatalkan!')) return;
-    
+
   ['bangunan', 'ruangan', 'barang', 'asetruangan', 'users', 'pinjamans', 'audit_logs', 'current_user'].forEach(localStorage.removeItem.bind(localStorage));
-    
+
   document.getElementById('resetAppInfo').innerHTML = '<span class="text-success">Semua data aplikasi berhasil direset! Halaman akan dimuat ulang.</span>';
-  setTimeout(() => { location.reload(); }, 1200);
+  setTimeout(() => {
+    location.reload();
+  }, 1200);
 }
 
 // 5. Sync Semua Data Master & Aset
 document.getElementById('btnSyncSheet').onclick = async function () {
-  const bangunanArr   = getData('bangunan');
-  const ruanganArr    = getData('ruangan');
-  const barangArr     = getData('barang');
-  const asetArr       = getData('asetruangan');
+  const bangunanArr = getData('bangunan');
+  const ruanganArr = getData('ruangan');
+  const barangArr = getData('barang');
+  const asetArr = getData('asetruangan');
   const nowTimestamp = new Date().toISOString();
 
   const payloadBangunan = bangunanArr.map(b => ({
@@ -3255,30 +3366,39 @@ document.getElementById('btnSyncSheet').onclick = async function () {
   }));
 
   const bangunanList = bangunanArr;
-  const ruanganList  = ruanganArr;
-  const barangList   = barangArr;
+  const ruanganList = ruanganArr;
+  const barangList = barangArr;
   const payloadDaftarAset = asetArr.map(a => {
-    const ru = ruanganList.find(r => r.id === a.ruanganId) || { nama: '', bangunanId: '' };
-    const ba = bangunanList.find(b => b.id === ru.bangunanId) || { nama: '' };
-    const br = barangList.find(b => b.id === a.barangId) || { nama: '', kategori: '', spesifikasi: '' };
+    const ru = ruanganList.find(r => r.id === a.ruanganId) || {
+      nama: '',
+      bangunanId: ''
+    };
+    const ba = bangunanList.find(b => b.id === ru.bangunanId) || {
+      nama: ''
+    };
+    const br = barangList.find(b => b.id === a.barangId) || {
+      nama: '',
+      kategori: '',
+      spesifikasi: ''
+    };
 
     const kebutuhan = a.kebutuhan || 0;
-    const jumlah    = a.jumlah || 0;
-    const selisih   = kebutuhan ? (jumlah - kebutuhan) : 0;
+    const jumlah = a.jumlah || 0;
+    const selisih = kebutuhan ? (jumlah - kebutuhan) : 0;
 
     return {
-      'ID Aset':       a.id,
+      'ID Aset': a.id,
       'Nama Bangunan': ba.nama,
-      'Nama Ruangan':  ru.nama,
-      'Nama Barang':   br.nama,
-      'Kategori':      br.kategori,
-      'Spesifikasi':   br.spesifikasi,
-      'Kebutuhan':     kebutuhan,
-      'Jumlah':        jumlah,
-      'Selisih':       selisih,
-      'Kondisi':       a.kondisi || '',
-      'Catatan':       a.catatan || '',
-      'Timestamp':     nowTimestamp
+      'Nama Ruangan': ru.nama,
+      'Nama Barang': br.nama,
+      'Kategori': br.kategori,
+      'Spesifikasi': br.spesifikasi,
+      'Kebutuhan': kebutuhan,
+      'Jumlah': jumlah,
+      'Selisih': selisih,
+      'Kondisi': a.kondisi || '',
+      'Catatan': a.catatan || '',
+      'Timestamp': nowTimestamp
     };
   });
 
@@ -3338,16 +3458,192 @@ function stopApprovalAutoRefresh() {
 
 // Auto close navbar when tab is clicked on mobile
 document.querySelectorAll('#navbarTabs .nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        const navbarCollapse = document.querySelector('.navbar-collapse');
-        if (navbarCollapse.classList.contains('show')) {
-            const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                toggle: false
-            });
-            bsCollapse.hide();
-        }
-    });
+  link.addEventListener('click', () => {
+    const navbarCollapse = document.querySelector('.navbar-collapse');
+    if (navbarCollapse.classList.contains('show')) {
+      const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+        toggle: false
+      });
+      bsCollapse.hide();
+    }
+  });
 });
+
+// --- 1. Tombol dan Modal Cetak Pencatatan Aset ---
+document.getElementById('btnCetakAsetRuangan').onclick = function () {
+  // Preload Nama PT & Unit dari localStorage jika ada
+  document.getElementById('inputNamaPT').value = localStorage.getItem('cetakNamaPT') || '';
+  document.getElementById('inputNamaUnit').value = localStorage.getItem('cetakNamaUnit') || '';
+  // Isi pilihan ruangan
+  isiDropdownRuanganCetak();
+  // Tampilkan modal
+  new bootstrap.Modal(document.getElementById('modalCetakAset')).show();
+};
+
+function isiDropdownRuanganCetak() {
+  const sel = document.getElementById('inputRuanganCetak');
+  const ruangan = getData('ruangan') || [];
+  sel.innerHTML = '<option value="all">Semua Ruangan</option>';
+  ruangan.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''));
+  ruangan.forEach(r => {
+    sel.innerHTML += `<option value="${r.nama}">${r.nama}</option>`;
+  });
+}
+
+// --- 2. Simpan Nama PT & Unit ke localStorage agar dipakai dokumen lain ---
+['inputNamaPT', 'inputNamaUnit'].forEach(id => {
+  document.getElementById(id).onchange = function () {
+    localStorage.setItem('cetakNamaPT', document.getElementById('inputNamaPT').value);
+    localStorage.setItem('cetakNamaUnit', document.getElementById('inputNamaUnit').value);
+  };
+});
+
+// --- 3. EXPORT PDF & EXCEL ---
+document.getElementById('btnExportAsetPDF').onclick = function () {
+  generateCetakAsetDokumen('pdf');
+};
+document.getElementById('btnExportAsetExcel').onclick = function () {
+  generateCetakAsetDokumen('excel');
+};
+
+async function generateCetakAsetDokumen(jenis) {
+  const namaPT = document.getElementById('inputNamaPT').value || '-';
+  const namaUnit = document.getElementById('inputNamaUnit').value || '-';
+  const ruanganTerpilih = document.getElementById('inputRuanganCetak').value;
+
+  // Simpan agar tetap ingat di sesi berikutnya
+  localStorage.setItem('cetakNamaPT', namaPT);
+  localStorage.setItem('cetakNamaUnit', namaUnit);
+
+  // Ambil data aset dari sheet
+  await fetchAsetFromSheet();
+  let data = Array.isArray(asetSheetData) ? [...asetSheetData] : [];
+
+  // Filter jika satu ruangan saja
+  let daftarRuangan;
+  if (ruanganTerpilih && ruanganTerpilih !== 'all') {
+    daftarRuangan = [ruanganTerpilih];
+  } else {
+    // Semua ruangan unik (urut abjad)
+    daftarRuangan = Array.from(new Set(data.map(r => r["Nama Ruangan"]))).sort();
+  }
+
+  // Susun data per ruangan, urutkan barang
+  const dataPerRuangan = daftarRuangan.map(namaRu => {
+    let baris = data.filter(r => r["Nama Ruangan"] === namaRu)
+      .sort((a, b) => (a["Nama Barang"] || '').localeCompare(b["Nama Barang"] || ''));
+    return {
+      namaRu,
+      baris
+    };
+  });
+
+  // Timestamp format lokal
+  const now = new Date();
+  const tglCetak = now.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  const jamCetak = now.toLocaleTimeString('id-ID', {
+    hour12: false
+  });
+  const tsCetak = `Dicetak: ${tglCetak} - ${jamCetak}`;
+
+  if (jenis === 'pdf') {
+    const {
+      jsPDF
+    } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    dataPerRuangan.forEach((ru, idx) => {
+      if (idx > 0) doc.addPage();
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(namaPT, 14, 14);
+      doc.text(namaUnit, 14, 21);
+      doc.setFont(undefined, 'normal');
+      doc.text(`DAFTAR ASET ${ru.namaRu.toUpperCase()}`, 70, 35);
+      doc.setFont(undefined, 'normal');
+      doc.autoTable({
+        head: [
+          [
+            "No", "Barang", "Kebutuhan", "Aktual", "Selisih", "Kondisi", "Catatan"
+          ]
+        ],
+        body: ru.baris.map((row, i) => [
+          i + 1,
+          row["Nama Barang"] || '',
+          row["Kebutuhan"] || 0,
+          row["Jumlah"] || 0,
+          (parseInt(row["Jumlah"] || 0) - parseInt(row["Kebutuhan"] || 0)),
+          row["Kondisi"] || '',
+          row["Catatan"] || ''
+        ]),
+        startY: 41,
+        margin: {
+          left: 14,
+          right: 14
+        },
+        styles: {
+          fontSize: 9
+        }
+      });
+      doc.setFontSize(9); // Ganti ukuran sesuai keinginan
+      doc.setFont(undefined, 'normal'); // normal (bukan bold)
+      doc.text(tsCetak, 14, doc.autoTable.previous.finalY + 8);
+
+      // Tanda tangan (baris rata 3)
+      doc.setFontSize(11); // Misal ingin sedikit lebih besar
+      doc.setFont(undefined, 'bold'); // Bisa bold kalau mau tegas
+
+      doc.text('PENGGUNA', 30, doc.autoTable.previous.finalY + 26, {
+        align: 'center'
+      });
+      doc.text('KTU', 105, doc.autoTable.previous.finalY + 26, {
+        align: 'center'
+      });
+      doc.text('EM', 180, doc.autoTable.previous.finalY + 26, {
+        align: 'center'
+      });
+    });
+    doc.save(`Pencatatan_Aset_${namaUnit}_${tglCetak}.pdf`);
+  } else {
+    // EXCEL: SheetJS
+    const wb = XLSX.utils.book_new();
+    dataPerRuangan.forEach(ru => {
+      const ws_data = [
+        [namaPT],
+        [namaUnit],
+        [`DAFTAR ASET ${ru.namaRu.toUpperCase()}`],
+        [],
+        ["No", "Barang", "Kebutuhan", "Aktual", "Selisih", "Kondisi", "Catatan"]
+      ];
+      ru.baris.forEach((row, i) => {
+        ws_data.push([
+          i + 1,
+          row["Nama Barang"] || '',
+          row["Kebutuhan"] || 0,
+          row["Jumlah"] || 0,
+          (parseInt(row["Jumlah"] || 0) - parseInt(row["Kebutuhan"] || 0)),
+          row["Kondisi"] || '',
+          row["Catatan"] || ''
+        ]);
+      });
+      ws_data.push([]);
+      ws_data.push([tsCetak]);
+      ws_data.push([]);
+      ws_data.push(['PENGGUNA', '', 'KTU', '', 'EM']);
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, ru.namaRu);
+    });
+    XLSX.writeFile(wb, `Pencatatan_Aset_${namaUnit}_${tglCetak}.xlsx`);
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
   if (CURRENT_USER && CURRENT_USER.role === 'admin') {
@@ -3357,7 +3653,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const originalLogout = logout;
-logout = function() {
+logout = function () {
   stopApprovalAutoRefresh();
   originalLogout();
 };

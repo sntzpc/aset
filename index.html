@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aset Seriang Training Center</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -293,6 +294,12 @@
                         <div class="card">
                             <div class="card-header bg-secondary text-white">Daftar Aset di Ruangan</div>
                             <div class="card-body p-2">
+                                <div class="d-flex gap-2 mt-2">
+  <button class="btn btn-info btn-sm" id="btnCetakAsetRuangan">
+    <i class="bi bi-printer"></i> Print
+  </button>
+</div>
+<br>
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-4">
                                         <select id="filterRuanganAset" class="form-select"></select>
@@ -304,6 +311,7 @@
                                             <option>Rusak</option>
                                             <option>Diperbaiki</option>
                                             <option>Hilang</option>
+                                            <option>Belum ada</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4">
@@ -623,6 +631,46 @@
 
         </div>
     </div>
+    <!-- Modal Cetak Pencatatan Aset -->
+<div class="modal fade" id="modalCetakAset" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="formCetakAset">
+        <div class="modal-header">
+          <h5 class="modal-title">Cetak Dokumen Pencatatan Aset</h5>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">
+            <label>Nama PT</label>
+            <input type="text" class="form-control" id="inputNamaPT" required>
+          </div>
+          <div class="mb-2">
+            <label>Nama Unit</label>
+            <input type="text" class="form-control" id="inputNamaUnit" required>
+          </div>
+          <div class="mb-2">
+            <label>Ruangan</label>
+            <select class="form-select" id="inputRuanganCetak">
+              <option value="all">Semua Ruangan</option>
+              <!-- opsi ruangan akan diisi lewat JS -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <div>
+            <button type="button" class="btn btn-success" id="btnExportAsetExcel">
+              <i class="bi bi-file-earmark-excel"></i> Export Excel
+            </button>
+            <button type="button" class="btn btn-danger" id="btnExportAsetPDF">
+              <i class="bi bi-file-earmark-pdf"></i> Export PDF
+            </button>
+          </div>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <div id="toast-container" style="position: fixed; top: 1.5rem; right: 1.5rem; z-index: 1080;"></div>
