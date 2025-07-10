@@ -1988,12 +1988,15 @@ function cekAksesUI() {
   const tabLaporan = document.getElementById('nav-laporan');
   const tabSync = document.getElementById('nav-sync');
   const tabPinjam = document.getElementById('nav-peminjaman');
+  const tabSetuju = document.getElementById('nav-setuju');
+  const tabAtur = document.getElementById('nav-atur');
   const sectionUser = document.getElementById('userSection');
   const panelMaster = document.getElementById('masterdata');
   const panelAset = document.getElementById('aset');
   const panelPinjam = document.getElementById('peminjaman');
 
-  [tabDashboard, tabMaster, tabAset, tabLaporan, tabSync, tabPinjam].forEach(el => {
+
+  [tabDashboard, tabMaster, tabAset, tabLaporan, tabSetuju, tabSync, tabAtur, tabPinjam].forEach(el => {
     if (el) el.style.display = 'none';
   });
   [panelMaster, panelAset, panelPinjam].forEach(el => {
@@ -2009,6 +2012,8 @@ function cekAksesUI() {
     if (tabAset) tabAset.style.display = '';
     if (tabLaporan) tabLaporan.style.display = '';
     if (tabSync) tabSync.style.display = '';
+    if (tabSetuju) tabSetuju.style.display='';
+    if (tabAtur) tabAtur.style.display='';
     if (panelMaster) panelMaster.style.display = '';
     if (panelAset) panelAset.style.display = '';
     if (sectionUser) sectionUser.style.display = '';
@@ -2069,7 +2074,7 @@ document.querySelectorAll('.nav-link').forEach(tab => {
       }
     }
     if (CURRENT_USER.role === 'peminjam') {
-      if (tabTarget === "#masterdata" || tabTarget === "#aset" || tabTarget === "#sync") {
+      if (tabTarget === "#masterdata" || tabTarget === "#aset" || tabTarget === "#setuju" || tabTarget === "#atur" || tabTarget === "#sync") {
         e.preventDefault();
         showToast("Menu ini hanya untuk admin!", "danger");
         document.querySelector('a[href="#dashboard"]').click();
