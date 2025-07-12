@@ -1968,6 +1968,10 @@ function handleLoginSuccess(user) {
   cekAksesUI();
   document.querySelector('a[href="#dashboard"]').click();
   if (CURRENT_USER.role === 'peminjam') {
+    // Otomatis buka tab Peminjaman
+    setTimeout(() => {
+      document.querySelector('a[href="#peminjaman"]').click();
+    }, 200); // Delay agar UI siap
     refreshBarangPinjamSelect();
     refreshRiwayatPinjam();
   }
@@ -2564,6 +2568,7 @@ async function renderApprovalTable() {
 
   // 1) Tarik data history terbaru
   await fetchHistoryFromSheet();
+  await renderAsetDipinjamTable();
 
   // 2) Ambil semua record “Pending” (pinjam) dan filter yang paling baru per siklus
   const pendingBorrow = historyPinjamanData.filter(h => h["Status"] === "Pending");
@@ -2678,6 +2683,99 @@ async function renderApprovalTable() {
 
   document.getElementById('approvalTable').innerHTML = html;
 }
+
+// Menampilkan daftar aset yang sedang dipinjam (status Approved, belum ReturnPending/Returned)
+async function renderAsetDipinjamTable() {
+    await fetchHistoryFromSheet();
+
+    // Step 1: Dapatkan entry terakhir (Approved atau ReturnPending) untuk setiap (User, Barang, Kategori)
+    const mapLatest = {};
+    historyPinjamanData.forEach(h => {
+        const key = [
+            h["Username"] || "",
+            h["Nama Barang"] || "",
+            h["Kategori"] || ""
+        ].join('|');
+        // Ambil entry paling akhir (timestamp terbesar)
+        if (!mapLatest[key] ||
+            new Date(h["Timestamp Server"]) > new Date(mapLatest[key]["Timestamp Server"])) {
+            mapLatest[key] = h;
+        }
+    });
+
+    // Step 2: Untuk setiap entry latest yang Approved/ReturnPending, cari tanggal pinjam dari Approved
+    const asetDipinjam = [];
+    Object.values(mapLatest).forEach(h => {
+        if (h["Status"] === "Approved" || h["Status"] === "ReturnPending") {
+            // Cari record Approved terbaru sebelum/tanggal sama dgn latest (berdasarkan Timestamp Server dan jumlah yg sama)
+            let tanggalApproved = h["Tanggal"];
+            if (h["Status"] === "ReturnPending") {
+                // Cari Approved sebelumnya untuk kombinasi yang sama & jumlah yg sama
+                const approvedHist = historyPinjamanData
+                  .filter(x =>
+                    x["Username"] === h["Username"] &&
+                    x["Nama Barang"] === h["Nama Barang"] &&
+                    x["Kategori"] === h["Kategori"] &&
+                    x["Status"] === "Approved" &&
+                    x["Jumlah"] === h["Jumlah"] &&
+                    new Date(x["Timestamp Server"]) <= new Date(h["Timestamp Server"])
+                  )
+                  .sort((a, b) => new Date(b["Timestamp Server"]) - new Date(a["Timestamp Server"]));
+                if (approvedHist.length > 0) {
+                    tanggalApproved = approvedHist[0]["Tanggal"];
+                }
+            }
+            asetDipinjam.push({
+                ...h,
+                tanggalPinjam: tanggalApproved
+            });
+        }
+    });
+
+    // Susun tabel
+    let html = `
+    <h5 class="mb-2 text-info">Daftar Aset yang Sedang Dipinjam</h5>
+    <div class="table-responsive" style="white-space:nowrap;">
+        <table class="table table-sm table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Barang</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                    <th>Tanggal Pinjam</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    if (asetDipinjam.length === 0) {
+        html += `<tr><td colspan="6" class="text-muted text-center">Tidak ada aset yang sedang dipinjam.</td></tr>`;
+    } else {
+        asetDipinjam.forEach(h => {
+            html += `
+                <tr>
+                    <td>${h["Username"]}</td>
+                    <td>${h["Nama Barang"]}</td>
+                    <td>${h["Kategori"] || '-'}</td>
+                    <td>${h["Jumlah"]}</td>
+                    <td>${h["Status"]}</td>
+                    <td>${h["tanggalPinjam"]}</td>
+                </tr>
+            `;
+        });
+    }
+
+    html += `
+            </tbody>
+        </table>
+    </div>
+    `;
+
+    document.getElementById('tableAsetDipinjam').innerHTML = html;
+}
+
 
 window.approvePinjaman = async function (timestampServer) {
   await fetchHistoryFromSheet();
@@ -3103,6 +3201,10 @@ document.getElementById('btnExportAuditLog').onclick = function () {
   XLSX.utils.book_append_sheet(wb, ws, 'AuditLog');
   XLSX.writeFile(wb, 'Audit_Log_STC.xlsx');
 };
+
+document.querySelector('a[href="#setuju"]').addEventListener('shown.bs.tab', function () {
+    renderApprovalTable(); // ini otomatis akan memanggil renderAsetDipinjamTable
+});
 
 document.querySelector('a[href="#peminjaman"]').addEventListener('shown.bs.tab', function () {
   if (CURRENT_USER && CURRENT_USER.role === 'peminjam') {
@@ -3679,6 +3781,10 @@ window.addEventListener('DOMContentLoaded', () => {
     showLoginModal();
   } else {
     if (CURRENT_USER.role === 'peminjam') {
+      // Buka tab Peminjaman otomatis jika reload
+      setTimeout(() => {
+        document.querySelector('a[href="#peminjaman"]').click();
+      }, 200);
       refreshBarangPinjamSelect();
       refreshRiwayatPinjam();
     }
