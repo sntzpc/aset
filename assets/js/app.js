@@ -229,7 +229,7 @@ function editBangunan(id) {
   if (!b) return;
   document.getElementById('namaBangunan').value = b.nama;
   document.getElementById('formBangunan').setAttribute('data-edit-id', id);
-  document.querySelector('#formBangunan button[type="submit"]').textContent = 'Simpan Perubahan';
+  document.querySelector('#formBangunan button[type="submit"]').textContent = 'Ubah';
 }
 
 // --- 2. Fetch (Pull) Data Bangunan dari Google Sheets ---
@@ -433,7 +433,7 @@ function editRuangan(id) {
   document.getElementById('namaRuangan').value = r.nama;
   document.getElementById('bangunanRuang').value = r.bangunanId;
   document.getElementById('formRuangan').setAttribute('data-edit-id', id);
-  document.querySelector('#formRuangan button[type="submit"]').textContent = 'Simpan Perubahan';
+  document.querySelector('#formRuangan button[type="submit"]').textContent = 'Ubah';
 }
 
 // 2.2.2. Handler formRuangan
@@ -602,7 +602,7 @@ function editBarang(id) {
   document.getElementById('spesifikasiBarang').value = b.spesifikasi || '';
   const formEl = document.getElementById('formBarang');
   formEl.setAttribute('data-edit-id', id);
-  document.querySelector('#formBarang button[type="submit"]').textContent = 'Simpan Perubahan';
+  document.querySelector('#formBarang button[type="submit"]').textContent = 'Ubah';
 }
 
 // 6.2. Handler formBarang.submit → Create / Update
@@ -1178,7 +1178,7 @@ function editAsetRuangan(idAset) {
 
   const formEl = document.getElementById('formAsetRuangan');
   formEl.setAttribute('data-edit-id', idAset);
-  document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Simpan Perubahan';
+  document.querySelector('#formAsetRuangan button[type="submit"]').textContent = 'Ubah';
 }
 
 
@@ -2176,7 +2176,7 @@ function editUser(username) {
     opt.selected = u.kategoriAkses && u.kategoriAkses.includes(opt.value);
   });
   document.getElementById('formUser').setAttribute('data-edit-username', username);
-  document.querySelector('#formUser button[type="submit"]').textContent = 'Simpan Perubahan';
+  document.querySelector('#formUser button[type="submit"]').textContent = 'Ubah';
 }
 
 function deleteUser(username) {
@@ -2213,17 +2213,33 @@ function deleteUser(username) {
 
 document.getElementById('formUser').onsubmit = async function (e) {
   e.preventDefault();
-  const username = document.getElementById('userUsername').value.trim();
+
+  const formEl = document.getElementById('formUser');
+  const usernameInput = document.getElementById('userUsername');
+  const username = usernameInput.value.trim();
   const password = document.getElementById('userPassword').value.trim();
   const role = document.getElementById('userRole').value;
   const kategoriSelect = document.getElementById('userKategori');
   const kategoriAkses = Array.from(kategoriSelect.selectedOptions).map(opt => opt.value);
-
-  const formEl = document.getElementById('formUser');
   const editUsername = formEl.getAttribute('data-edit-username');
   let users = getUsers();
 
+  // Validasi
+  if (!username || !password || !role || kategoriAkses.length === 0) {
+    alert('Lengkapi semua data user!');
+    return;
+  }
+
+  // ==== MODE EDIT USER ====
   if (editUsername) {
+    // Jika user mencoba ganti username pada mode edit, tolak!
+    if (username !== editUsername) {
+      alert('Username tidak boleh diubah saat edit. Silakan hapus user lalu tambah ulang jika ingin mengganti username.');
+      usernameInput.value = editUsername;
+      return;
+    }
+
+    // Update di local
     const idx = users.findIndex(x => x.username === editUsername);
     if (idx > -1) {
       users[idx].password = password;
@@ -2232,19 +2248,21 @@ document.getElementById('formUser').onsubmit = async function (e) {
       setUsers(users);
     }
 
+    // Payload untuk update di Google Sheet
     const now = new Date().toISOString();
     const payloadAunth = {
       action: 'update',
       table: 'Aunth',
       data: [{
-        'username': editUsername,
+        'username': editUsername, // username lama sebagai key pencarian
         'password': password,
         'role': role,
         'kategoriAkses': kategoriAkses.join(','),
         'Timestamp': now
       }]
     };
-    fetch(GAS_URL, {
+
+    await fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: {
@@ -2262,10 +2280,15 @@ document.getElementById('formUser').onsubmit = async function (e) {
     refreshUserTable();
     logAudit('Edit User', `User: ${editUsername}`);
 
+  // ==== MODE TAMBAH USER ====
   } else {
+    // Cek username sudah ada?
     if (users.find(u => u.username === username)) {
-      return alert('Username sudah ada di lokal!');
+      alert('Username sudah ada!');
+      return;
     }
+
+    // Tambah ke local
     const newUserObj = {
       username,
       password,
@@ -2275,6 +2298,7 @@ document.getElementById('formUser').onsubmit = async function (e) {
     users.push(newUserObj);
     setUsers(users);
 
+    // Payload untuk tambah user baru di Google Sheet
     const now = new Date().toISOString();
     const payloadAunth = {
       action: 'append',
@@ -2287,7 +2311,7 @@ document.getElementById('formUser').onsubmit = async function (e) {
         'Timestamp': now
       }]
     };
-    fetch(GAS_URL, {
+    await fetch(GAS_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: {
@@ -2302,6 +2326,7 @@ document.getElementById('formUser').onsubmit = async function (e) {
     logAudit('Tambah User', `User: ${username}`);
   }
 };
+
 
 
 // Isi select kategori secara dinamis dari master barang
