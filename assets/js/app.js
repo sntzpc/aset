@@ -2493,67 +2493,86 @@ async function refreshBarangPinjamSelect() {
 
 document.getElementById('formPinjam').onsubmit = async function (e) {
   e.preventDefault();
-  const barangNama = document.getElementById('pinjamBarang').value;
-  const jumlah = parseInt(document.getElementById('pinjamJumlah').value);
-  if (!barangNama || !jumlah) return;
+  const btnPinjam = document.getElementById('btnPinjamSubmit'); // pastikan tombol submit punya id="btnPinjamSubmit"
+  btnPinjam.disabled = true;
+  const prevHTML = btnPinjam.innerHTML;
+  btnPinjam.innerHTML = 'Memproses... <span class="spinner-border spinner-border-sm"></span>';
 
-  await fetchHistoryFromSheet();
-  const masterList = await fetchMasterBarangFromSheet();
-  const masterItem = masterList.find(item => item["Nama Barang"] === barangNama);
-  if (!masterItem) {
-    return showToast("⚠️ Barang tidak ditemukan di Master Barang.", "danger");
+  try {
+    const barangNama = document.getElementById('pinjamBarang').value;
+    const jumlah = parseInt(document.getElementById('pinjamJumlah').value);
+    if (!barangNama || !jumlah) {
+      showToast("Barang dan jumlah wajib diisi.", "danger");
+      return;
+    }
+
+    await fetchHistoryFromSheet();
+    const masterList = await fetchMasterBarangFromSheet();
+    const masterItem = masterList.find(item => item["Nama Barang"] === barangNama);
+    if (!masterItem) {
+      showToast("⚠️ Barang tidak ditemukan di Master Barang.", "danger");
+      return;
+    }
+
+    const masterJumlah = parseInt(masterItem["Total Stok"] || '0', 10);
+
+    const approvedTotal = historyPinjamanData
+      .filter(h => h["Nama Barang"] === barangNama && h["Status"] === "Approved")
+      .reduce((s, h) => s + (parseInt(h["Jumlah"]) || 0), 0);
+    const returnedTotal = historyPinjamanData
+      .filter(h => h["Nama Barang"] === barangNama && h["Status"] === "Returned")
+      .reduce((s, h) => s + (parseInt(h["Jumlah"]) || 0), 0);
+
+    const outstanding = approvedTotal - returnedTotal;
+    const available = masterJumlah - outstanding;
+
+    if (available < jumlah) {
+      showToast(`Stok tidak cukup: tersedia cuma ${available}`, "danger");
+      return;
+    }
+
+    const nowLok = new Date().toLocaleString();
+    const nowISO = new Date().toISOString();
+    const payload = {
+      action: 'append',
+      table: 'History Peminjaman',
+      data: [{
+        'Tanggal': nowLok,
+        'Username': CURRENT_USER.username,
+        'Nama Barang': barangNama,
+        'Kategori': masterItem["Kategori"] || '',
+        'Jumlah': jumlah,
+        'Status': 'Pending',
+        'Keterangan': '',
+        'Timestamp Server': nowISO
+      }]
+    };
+
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    showToast('✅ Permintaan peminjaman dikirim. Menunggu approval admin.', 'info');
+    logAudit('Request Pinjam', `User: ${CURRENT_USER.username} → ${barangNama} (jml ${jumlah})`);
+
+    await fetchHistoryFromSheet();
+    refreshRiwayatPinjam();
+    await refreshBarangPinjamSelect();
+    document.getElementById('formPinjam').reset();
+
+  } catch (err) {
+    showToast('Terjadi kesalahan: ' + (err.message || err), 'danger');
+  } finally {
+    btnPinjam.disabled = false;
+    btnPinjam.innerHTML = prevHTML;
   }
-
-  const masterJumlah = parseInt(masterItem["Total Stok"] || '0', 10);
-
-  const approvedTotal = historyPinjamanData
-    .filter(h => h["Nama Barang"] === barangNama && h["Status"] === "Approved")
-    .reduce((s, h) => s + (parseInt(h["Jumlah"]) || 0), 0);
-  const returnedTotal = historyPinjamanData
-    .filter(h => h["Nama Barang"] === barangNama && h["Status"] === "Returned")
-    .reduce((s, h) => s + (parseInt(h["Jumlah"]) || 0), 0);
-
-  const outstanding = approvedTotal - returnedTotal;
-  const available = masterJumlah - outstanding;
-
-  if (available < jumlah) {
-    return showToast(`Stok tidak cukup: tersedia cuma ${available}`, "danger");
-  }
-
-  const nowLok = new Date().toLocaleString();
-  const nowISO = new Date().toISOString();
-  const payload = {
-    action: 'append',
-    table: 'History Peminjaman',
-    data: [{
-      'Tanggal': nowLok,
-      'Username': CURRENT_USER.username,
-      'Nama Barang': barangNama,
-      'Kategori': masterItem["Kategori"] || '',
-      'Jumlah': jumlah,
-      'Status': 'Pending',
-      'Keterangan': '',
-      'Timestamp Server': nowISO
-    }]
-  };
-
-  await fetch(GAS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-
-  showToast('✅ Permintaan peminjaman dikirim. Menunggu approval admin.', 'info');
-  logAudit('Request Pinjam', `User: ${CURRENT_USER.username} → ${barangNama} (jml ${jumlah})`);
-
-  await fetchHistoryFromSheet();
-  refreshRiwayatPinjam();
-  await refreshBarangPinjamSelect();
-  document.getElementById('formPinjam').reset();
 };
+
 
 
 // -------------------------------------------
