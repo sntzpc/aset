@@ -36,7 +36,7 @@ const BANGUNAN_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEE
 const RUANGAN_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Ruangan?key=${GOOGLE_API_KEY}`;
 const BARANG_SHEET_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Barang?key=${GOOGLE_API_KEY}`;
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyCANF7ieGc4AHpnlHMO7CZU3cd6gWih9jzB9S09xXkQZic-QTPIByxE01HzRLJTHcZbg/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbztQA8UHgTXaSVNRXDv5rOY01EmoIvAeAlFphTwiWk9sARuwosBymu1pyQow1NXx1jCRQ/exec';
 
 const TELEGRAM_BOT_TOKEN = '7520083448:AAHbf4QgZurXd8gbI2OnM0PxD8jK_zAXJ08';
 const TELEGRAM_CHAT_ID = '968137878';
