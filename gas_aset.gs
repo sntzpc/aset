@@ -117,75 +117,91 @@ function findRowById(sheet, idHeaderKey, idValue) {
  *   2) kemudian berdasarkan Nama Barang (ascending).
  */
 function updateMasterBarangSheet() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const asetSheet = ss.getSheetByName('Daftar Aset');
-  if (!asetSheet) return;
-  
-  // Ambil semua data Daftar Aset
-  const data = asetSheet.getDataRange().getValues();
-  if (data.length < 2) return;
-
-  // Tentukan indeks kolom berdasarkan header
-  const headers = data[0];
-  const idxNamaBarang   = headers.indexOf('Nama Barang');
-  const idxKategori     = headers.indexOf('Kategori');
-  const idxSpesifikasi  = headers.indexOf('Spesifikasi');
-  const idxJumlah       = headers.indexOf('Jumlah');
-
-  if (idxNamaBarang < 0 || idxKategori < 0 || idxSpesifikasi < 0 || idxJumlah < 0) {
-    throw new Error('Header "Nama Barang", "Kategori", "Spesifikasi", atau "Jumlah" tidak ditemukan.');
+  // ==== LOCK aman untuk semua konteks (container-bound / standalone) ====
+  let lock = null;
+  try {
+    // Pada container-bound biasanya aman
+    lock = LockService.getDocumentLock();
+  } catch (e) {
+    // Abaikan, lanjut fallback
   }
+  if (!lock) lock = LockService.getScriptLock();
+  lock.waitLock(30 * 1000); // cegah eksekusi bersamaan hingga 30 detik
 
-  // Agregasi berdasarkan (Nama Barang, Kategori, Spesifikasi)
-  const agregat = {};
-  for (let i = 1; i < data.length; i++) {
-    const row      = data[i];
-    const nama     = row[idxNamaBarang]   || '';
-    const kategori = row[idxKategori]     || '';
-    const spek     = row[idxSpesifikasi]  || '';
-    const jumlah   = parseFloat(row[idxJumlah]) || 0;
-    const key      = `${nama}||${kategori}||${spek}`;
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const asetSheet = ss.getSheetByName('Daftar Aset');
+    if (!asetSheet) return;
 
-    if (!agregat[key]) {
-      agregat[key] = {
-        nama:     nama,
-        kategori: kategori,
-        spek:     spek,
-        jumlah:   0
-      };
+    const lastRow = asetSheet.getLastRow();
+    const lastCol = asetSheet.getLastColumn();
+    if (lastRow < 2) return; // hanya header
+
+    // Ambil data secukupnya (hindari getDataRange pada sheet besar)
+    const data = asetSheet.getRange(1, 1, lastRow, lastCol).getValues();
+
+    // Header → indeks kolom
+    const headers = data[0];
+    const idxNamaBarang  = headers.indexOf('Nama Barang');
+    const idxKategori    = headers.indexOf('Kategori');
+    const idxSpesifikasi = headers.indexOf('Spesifikasi');
+    const idxJumlah      = headers.indexOf('Jumlah');
+    if (idxNamaBarang < 0 || idxKategori < 0 || idxSpesifikasi < 0 || idxJumlah < 0) {
+      throw new Error('Header "Nama Barang", "Kategori", "Spesifikasi", atau "Jumlah" tidak ditemukan.');
     }
-    agregat[key].jumlah += jumlah;
+
+    // Agregasi
+    const agregat = Object.create(null);
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const nama = row[idxNamaBarang]   || '';
+      const kategori = row[idxKategori] || '';
+      const spek = row[idxSpesifikasi]  || '';
+      const jumlah = parseFloat(row[idxJumlah]) || 0;
+      const key = nama + '||' + kategori + '||' + spek;
+      const obj = agregat[key] || (agregat[key] = { nama, kategori, spek, jumlah: 0 });
+      obj.jumlah += jumlah;
+    }
+
+    // Sort
+    const masterRows = Object.values(agregat).sort((a, b) => {
+      const k = String(a.kategori).localeCompare(String(b.kategori));
+      return k !== 0 ? k : String(a.nama).localeCompare(String(b.nama));
+    });
+
+    // Siapkan data tulis
+    const masterHeader = ['Nama Barang', 'Kategori', 'Spesifikasi', 'Total Stok'];
+    const masterData = new Array(masterRows.length + 1);
+    masterData[0] = masterHeader;
+    for (let i = 0; i < masterRows.length; i++) {
+      const r = masterRows[i];
+      masterData[i + 1] = [r.nama, r.kategori, r.spek, r.jumlah];
+    }
+
+    // Tulis tanpa delete/insert sheet (lebih hemat waktu)
+    const sheetName = 'Master Barang';
+    const masterSheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+
+    // Bersihkan konten lama & pastikan ukuran range pas
+    masterSheet.clearContents();
+    if (masterSheet.getMaxRows() < masterData.length) {
+      masterSheet.insertRowsAfter(masterSheet.getMaxRows(), masterData.length - masterSheet.getMaxRows());
+    }
+    if (masterSheet.getMaxColumns() < masterHeader.length) {
+      masterSheet.insertColumnsAfter(masterSheet.getMaxColumns(), masterHeader.length - masterSheet.getMaxColumns());
+    }
+
+    masterSheet.getRange(1, 1, masterData.length, masterHeader.length).setValues(masterData);
+    masterSheet.setFrozenRows(1);
+    // (Opsional) Format ringan supaya tidak berat:
+    // masterSheet.getRange(1,1,1,masterHeader.length).setFontWeight('bold');
+
+  } finally {
+    try { lock.releaseLock(); } catch(_) {}
   }
-
-  // Ubah agregat menjadi array untuk di‐sort
-  const masterRows = Object.values(agregat);
-
-  //  Sort: pertama berdasarkan kategori, lalu berdasarkan nama barang
-  masterRows.sort((a, b) => {
-    const katCompare = a.kategori.toString().localeCompare(b.kategori.toString());
-    if (katCompare !== 0) return katCompare;
-    return a.nama.toString().localeCompare(b.nama.toString());
-  });
-
-  // Siapkan array 2D untuk ditulis ke sheet:
-  // baris pertama = header, sisanya = baris hasil agregasi dan sort
-  const masterHeader = ['Nama Barang', 'Kategori', 'Spesifikasi', 'Total Stok'];
-  const masterData = [ masterHeader ];
-  masterRows.forEach(obj => {
-    masterData.push([ obj.nama, obj.kategori, obj.spek, obj.jumlah ]);
-  });
-
-  // Hapus sheet lama (jika ada), lalu insert sheet baru "Master Barang"
-  let masterSheet = ss.getSheetByName('Master Barang');
-  if (masterSheet) {
-    ss.deleteSheet(masterSheet);
-  }
-  masterSheet = ss.insertSheet('Master Barang');
-
-  // Tulis data (header + isi) ke sheet baru, dan bekukan baris header
-  masterSheet.getRange(1, 1, masterData.length, masterHeader.length).setValues(masterData);
-  masterSheet.setFrozenRows(1);
 }
+
+
 
 
 // --- TRIGGER OTOMATIS (edit manual di Sheet) ---

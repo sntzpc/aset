@@ -2971,6 +2971,7 @@ async function refreshRiwayatPinjam() {
         <td>Disetujui</td>
         <td>
           <button class="btn btn-sm btn-warning"
+                  data-return-ts="${h["Timestamp Server"]}"
                   onclick="kembalikanPinjaman('${h["Timestamp Server"]}')">
             Kembalikan
           </button>
@@ -2995,56 +2996,93 @@ async function refreshRiwayatPinjam() {
   document.querySelector('#tabelRiwayatPinjam tbody').innerHTML = rowsHtml;
 }
 
-
-
 // -------------------------------------------
 // (G) Fungsi "Kembalikan" Peminjaman (User)
 // -------------------------------------------
+// === Helpers: spinner & anti double-click untuk tombol "Kembalikan" ===
+window.__returnInFlight = window.__returnInFlight || new Set();
 
-window.kembalikanPinjaman = async function (timestampServer) {
-  await fetchHistoryFromSheet();
+function __getReturnBtn(ts){
+  // Cari tombol berdasarkan data-attribute; fallback ke onclick bila belum ada.
+  return document.querySelector(`button[data-return-ts="${ts}"]`)
+      || document.querySelector(`button[onclick*="kembalikanPinjaman('${ts}')"]`);
+}
 
-  const target = historyPinjamanData.find(h =>
-    h["Timestamp Server"] === timestampServer &&
-    h["Status"] === "Approved" &&
-    h["Username"] === CURRENT_USER.username
-  );
-  if (!target) {
-    return alert("⚠️ Data untuk pengembalian tidak valid.");
+function __setBtnLoading(btn, isLoading){
+  if (!btn) return;
+  if (isLoading) {
+    if (!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Memproses...`;
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.originalHtml) {
+      btn.innerHTML = btn.dataset.originalHtml;
+      delete btn.dataset.originalHtml;
+    }
   }
+}
 
-  const nowLok = new Date().toLocaleString();
-  const nowISO = new Date().toISOString();
-  const payload = {
-    action: 'append',
-    table: 'History Peminjaman',
-    data: [{
-      'Tanggal': nowLok,
-      'Username': target["Username"],
-      'Nama Barang': target["Nama Barang"],
-      'Kategori': target["Kategori"] || '',
-      'Jumlah': target["Jumlah"],
-      'Status': 'ReturnPending',
-      'Keterangan': '',
-      'Timestamp Server': nowISO
-    }]
-  };
+// === Patch: fungsi kembalikanPinjaman dengan spinner + anti double-click ===
+window.kembalikanPinjaman = async function (timestampServer) {
+  // Anti double-click untuk ts yang sama
+  if (window.__returnInFlight.has(timestampServer)) return;
+  window.__returnInFlight.add(timestampServer);
 
-  await fetch(GAS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  const __btn = __getReturnBtn(timestampServer);
+  __setBtnLoading(__btn, true);
 
-  showToast('🔄 Permintaan pengembalian dikirim. Menunggu konfirmasi admin.', 'info');
-  logAudit('Return Request', `User: ${target["Username"]} → ${target["Nama Barang"]} (jml ${target["Jumlah"]})`);
+  try {
+    await fetchHistoryFromSheet();
 
-  await fetchHistoryFromSheet();
-  refreshRiwayatPinjam();
-  refreshBarangPinjamSelect();
+    const target = historyPinjamanData.find(h =>
+      h["Timestamp Server"] === timestampServer &&
+      h["Status"] === "Approved" &&
+      h["Username"] === CURRENT_USER.username
+    );
+    if (!target) {
+      alert("⚠️ Data untuk pengembalian tidak valid.");
+      return;
+    }
+
+    const nowLok = new Date().toLocaleString();
+    const nowISO = new Date().toISOString();
+    const payload = {
+      action: 'append',
+      table: 'History Peminjaman',
+      data: [{
+        'Tanggal': nowLok,
+        'Username': target["Username"],
+        'Nama Barang': target["Nama Barang"],
+        'Kategori': target["Kategori"] || '',
+        'Jumlah': target["Jumlah"],
+        'Status': 'ReturnPending',
+        'Keterangan': '',
+        'Timestamp Server': nowISO
+      }]
+    };
+
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    showToast('🔄 Permintaan pengembalian dikirim. Menunggu konfirmasi admin.', 'info');
+    logAudit('Return Request', `User: ${target["Username"]} → ${target["Nama Barang"]} (jml ${target["Jumlah"]})`);
+
+    await fetchHistoryFromSheet();
+    refreshRiwayatPinjam();
+    refreshBarangPinjamSelect();
+
+  } catch (err) {
+    console.error('Kembalikan error:', err);
+    showToast('❌ Terjadi kesalahan saat memproses pengembalian. Coba lagi.', 'danger');
+  } finally {
+    window.__returnInFlight.delete(timestampServer);
+    __setBtnLoading(__btn, false);
+  }
 };
 
 
